@@ -141,4 +141,4 @@ See [CREDITS.md](CREDITS.md). Code: MIT ([LICENSE](LICENSE)). All sound is synth
 
 ## AI usage
 
-Built solo with **Claude Code** (Anthropic) as the coding agent, following a written spec and prompt chain. The full prompt chain and the agent’s responses are in [`ai-logs/`](ai-logs/): the planning conversation (`ai-logs/00-planning/`), the build session transcripts (`ai-logs/transcripts/`, readable copies in `ai-logs/sessions/`) and an index (`ai-logs/INDEX.md`). See [ai-logs/README.md](ai-logs/README.md).
+Built solo with **Claude Code** (Anthropic) as the coding agent, following a written spec and prompt chain. The full prompt chain and the agent’s responses are in [`ai-logs/`](ai-logs/): the planning conversation (`ai-logs/00-planning/`; full chat: https://claude.ai/share/03a810c4-67a4-44bc-931d-d54b0f0e1fd5), the build session transcripts (`ai-logs/transcripts/`, readable copies in `ai-logs/sessions/`) and an index (`ai-logs/INDEX.md`). See [ai-logs/README.md](ai-logs/README.md).
