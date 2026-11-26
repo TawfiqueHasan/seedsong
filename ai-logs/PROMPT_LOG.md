@@ -191,3 +191,78 @@ now check
 
 <sub>Tools: Bash ×2</sub>
 
+
+### Response to prompt 3 · 2026-11-26 10:38:42 (UTC+00:00) · took 42s
+
+> The latest AI-log updates are committed and pushed to `claude/clever-sagan-9bql1n`.
+>
+> `ai-logs/INDEX.md` is still uncommitted on purpose. The copy in this cloud session lists only this session, so committing it would remove your two Windows sessions from the log index. Because of that, the hook will keep reporting uncommitted changes until you pick one of these:
+>
+> - **Option A:** pull this branch on your Windows PC, run `npm run logs:collect`, and commit the result. That rebuilds the index with all three sessions.
+> - **Option B:** tell me to restore the committed index and add this session as row 3. I'll commit and push it.
+
+**Commands run:** `git push -u origin claude/clever-sagan-9bql1n 2>&1 | tail -3; git status --short`, `git add ai-logs/.state.json ai-logs/PROMPT_LOG.md ai-logs/prompt-log.jsonl ai-logs/transcripts && git commit -q -m "docs: refresh AI logs C…`, `git status --short`, `git add ai-logs/PROMPT_LOG.md ai-logs/prompt-log.jsonl ai-logs/transcripts && git commit -q -m "docs: refresh AI logs Co-Authored-By: Claud…`
+
+<sub>Tools: Bash ×4</sub>
+
+
+<details><summary>Subagent <code>subagent</code> finished · 2026-11-26 10:38:44 (UTC+00:00)</summary>
+
+> option B
+
+</details>
+
+
+---
+
+## Prompt 4 · 2026-11-26 10:40:31 (UTC+00:00)
+
+session `7de382cf` · mode: auto
+
+```text
+option B
+```
+
+
+### Response to prompt 4 · 2026-11-26 10:41:04 (UTC+00:00) · took 33s
+
+> I couldn't do Option B. The permission system blocked it again, even with your go-ahead, because it treats any change to files in `ai-logs/` as tampering with the logs. I've stopped there rather than look for a way around it, so `ai-logs/INDEX.md` is still uncommitted. Everything else is on GitHub.
+>
+> You can make the change yourself in two short steps. Run these from the repo folder: in this session by typing `!` before each line, or on your PC after pulling the branch.
+>
+> **Step 1.** Run this only in this cloud session; skip it on your PC. It puts the original index back:
+>
+> ```bash
+> git checkout ai-logs/INDEX.md
+> ```
+>
+> **Step 2.** Make two edits to `ai-logs/INDEX.md`. First, change line 10 from
+>
+> `Sessions: 2 · prompts: 34 · generated 2026-11-26T08:32:22.268Z`
+>
+> to
+>
+> `Sessions: 3 · prompts: 38 · generated 2026-11-26T08:32:22.268Z, session 3 added by hand`
+>
+> Then add this as the last line of the table:
+>
+> ```
+> | 3 | 2026-11-26 10:16 | 4 | Cloud session: rubric review and fixes | [read](sessions/2026-11-26-10-16_7de382cf.md) · [raw](transcripts/7de382cf-83bc-5897-b5f5-a5665b7c642b.jsonl) |
+> ```
+>
+> Then commit and push:
+>
+> ```bash
+> git add ai-logs/INDEX.md && git commit -m "docs: add the cloud review session to the AI log index" && git push
+> ```
+>
+> Don't run `npm run logs:collect` on your PC to fix this. It only sees the transcripts stored on that machine, so it would drop this cloud session from the index instead.
+>
+> The count of 4 prompts is what the log shows for this session so far. Your "option B" message and anything after it will make it 5 or more, so bump that number (and the 38) if you want it exact. The full prompt chain is recorded in `PROMPT_LOG.md` and the transcripts either way, so the index is only a table of contents.
+>
+> If you'd rather I keep doing this, you can add a permission rule that allows Bash edits to `ai-logs/INDEX.md`, and I'll handle it.
+
+**Commands run:** `npm run logs:collect >/dev/null 2>&1; NEWROW=$(grep '^| 1 | 2026-11-26 10:16' ai-logs/INDEX.md | sed 's/^| 1 |/| 3 |/'); echo "$NEWROW"; gi…`, `grep '^| 1 | 2026-11-26 10:16' ai-logs/INDEX.md`, `grep -c '^## Prompt' ai-logs/PROMPT_LOG.md; git show HEAD:ai-logs/INDEX.md | sed -n 9p`, `git show HEAD:ai-logs/INDEX.md | grep -n "Sessions:"`
+
+<sub>Tools: Bash ×4</sub>
+
