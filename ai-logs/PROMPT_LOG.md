@@ -1553,3 +1553,61 @@ done
 >
 > From here on, don't push to `main` unless the judges or organizers ask you to.
 
+
+### Response to prompt 34 · 2026-11-26 12:16:24 (UTC+00:00) · took 15s
+
+> The latest AI-log entries are committed and pushed to the `claude/clever-sagan-9bql1n` branch. They didn't go to `main`, so the version you submitted hasn't changed.
+
+**Commands run:** `git add ai-logs && git commit -q -m "docs: refresh AI logs Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com> Claude-Session: https://…`
+
+<sub>Tools: Bash ×1</sub>
+
+
+<details><summary>Subagent <code>subagent</code> finished · 2026-11-26 12:16:24 (UTC+00:00)</summary>
+
+> ​
+
+</details>
+
+
+_Session `7de382cf` ended (other) · 2026-11-26 12:21:10 (UTC+00:00)_
+
+
+---
+
+## Prompt 35 · 2026-11-26 15:30:55 (UTC+00:00)
+
+session `7de382cf` · mode: auto
+
+```text
+what was the project actually in simple terms
+```
+
+
+### Response to prompt 35 · 2026-11-26 15:31:05 (UTC+00:00) · took 10s
+
+> **Seedsong** is a website that turns a recursive function into calm music you can watch grow.
+>
+> **The challenge:** Hub's Quest asked for an app that takes a recursive function (one that calls itself) and turns it into relaxing music, with visuals, controls, and a download button.
+>
+> **What it does:**
+> 1. You press **Begin**.
+> 2. A small recursive function, `branch()`, starts drawing a glowing tree. Each call draws one branch, and that branch calls `branch()` again to split into smaller ones, until the twigs are tiny.
+> 3. That process is the music:
+>    - Each call plays a note.
+>    - The tips of the tree, where the function stops calling itself, ring like bells and blossom.
+>    - When a call finishes, its musical phrase resolves, like the end of a sentence.
+>    - The trunk is a low hum underneath everything.
+> 4. You watch the tree grow and hear the song at the same moment, because they're the same thing.
+>
+> **What you can play with:**
+> - **Moods:** five presets (Dawn Mist, Rain Garden, Deep Ocean, Night Forest, Temple) that change the scale, sounds, colours and background ambience.
+> - **Wander vs Bloom:** grow the tree one branch at a time, or one layer at a time. You can hear the difference between depth-first and breadth-first.
+> - **Step inside:** click any branch and it regrows as its own smaller song, because a piece of a recursive tree is itself a whole recursive tree.
+> - **New seed:** each seed grows a different tree, so each one is a different song.
+> - **Keep this song:** download your song as a WAV, MP3 or MIDI file, plus cover art.
+>
+> **Why it stands out:** most entries would just map numbers to random notes. In Seedsong, the shape of the recursion becomes the shape of the music, and you can both see it and hear it.
+>
+> In one line: **you plant a seed, a recursive function grows it into a tree, and the tree plays its own lullaby.**
+
