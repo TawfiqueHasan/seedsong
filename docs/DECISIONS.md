@@ -1,0 +1,19 @@
+# Build decisions (and where they differ from the spec)
+
+The spec (`docs/SPEC.md`) was written before any code. These are the places the build deliberately differs, and why.
+
+| Spec | Build | Why |
+| --- | --- | --- |
+| Tailwind CSS 4 + Radix UI + Motion | Plain CSS with design tokens (`src/styles/app.css`), native elements (`<input type="range">`, `<dialog>`, `role="tablist"`), CSS animations | Fewer moving parts in a 24-hour build, a smaller bundle (181 KB gzipped JS), and native controls are accessible by default (keyboard, focus trap, `aria-valuetext`). The visual token system from SPEC §7.1 is unchanged. |
+| `compose.worker.ts` (generate + compose off the main thread) | Main thread | The largest tree (2,047 nodes) generates and composes in about 8 ms, well under the 50 ms budget, so a worker adds complexity for no gain. |
+| Visual sync via `getDraw().schedule()` events | The renderer reads the audible transport time every frame and derives growth, highlights and blossoms from the Score | Same audio clock, no drift, and seeking or pausing needs no event replay. The renderer still never schedules audio. |
+| Pause by stopping the transport | Pause fades out, then suspends the AudioContext | Every envelope and the transport freeze exactly where they are, so resuming is seamless (no re-triggering). |
+| Crossfade two racks on regenerate | Dip-crossfade: fade out 1.1 s, swap, fade in 1.6 s | Half the CPU, and it still never cuts. Mood changes build the new rack before the old one is released, and old racks are disposed after their reverb tails. |
+| `Tone.Offline()` for export | A hand-built `OfflineContext` with the same steps | Tone's clock loop yields with `setTimeout` once per second of audio, which background tabs throttle to about 1 s per yield. This loop yields with a `MessageChannel`, and `OfflineAudioContext.suspend()` checkpoints give a real progress bar. |
+| Reverb decay 9 s, pad `fattriangle` × 3 | Decay 7 s, × 2 | Offline rendering was dominated by these nodes; this keeps the sound lush and makes export noticeably faster. |
+| Hanoi Music Box (Could) | Not built | Two recursions (Grove and L-System) cover “more than one recursion”; time went to sound, UX and tests instead. |
+| L-System presets include Koch, Dragon, Sierpinski, Hilbert | Branching plants only (Fern, Willow, Sprig, Reed, Bush, Lantern) | The music is built from the bracket tree (`[` = call, `]` = return). Curves without brackets have no branching structure, so they would be one long phrase. “Garden” plants keep the mapping honest. |
+
+## Timing safety (a bug found by the e2e tests)
+
+When the song regrows, notes from the old transport that were already handed to the audio graph (inside the 0.12 s look-ahead) can still start after the new transport begins. A voice could then receive a start time earlier than one it already had, and Tone throws. The engine now releases voices and restarts the transport only after the look-ahead window (`settled()`, `startOffset` in `src/audio/engine.ts`).

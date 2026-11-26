@@ -1,0 +1,27 @@
+# local originals (copies live in ai-logs/00-planning)
+/seedsong-starter-kit.zip
+/Recursive Soundscapes*.pdf
+# node / vite
+node_modules
+dist
+dist-ssr
+*.local
+coverage
+test-results
+playwright-report
+blob-report
+.vite
+# editor / os
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+Thumbs.db
+*.log
+!ai-logs/**
+.env
+.env.*
+
+# local tool config
+.claude/launch.json
+.claude/settings.local.json
