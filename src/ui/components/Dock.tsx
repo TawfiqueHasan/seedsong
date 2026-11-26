@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
-import { Download, GitBranch, Layers, Pause, Play, Sprout, Volume2, VolumeX } from 'lucide-react';
+import { Download, GitBranch, Layers, Pause, Play, Sprout, Volume2, VolumeX, ZoomIn } from 'lucide-react';
 import { MOOD_LIST } from '../../core/music/moods';
 import { totalLength } from '../../core/music/score';
 import { getWorld } from '../../core/worlds/registry';
 import { useApp } from '../../state/store';
-import { seek, setVolume, toggleMute, togglePlay } from '../../app/controller';
+import { seek, setVolume, stepIntoPlaying, toggleMute, togglePlay } from '../../app/controller';
 import { fmtTime, usePosition } from '../hooks';
 
 export function MoodChips() {
@@ -151,6 +151,9 @@ export function Transport() {
         <Skyline />
       </div>
       <div className="vol">
+        <button className="icon-btn" onClick={() => stepIntoPlaying()} aria-label="Step inside the branch that is playing (I)" title="Step inside the playing branch (I). Or click any branch.">
+          <ZoomIn aria-hidden="true" />
+        </button>
         <button className="icon-btn" onClick={newSeed} aria-label="Plant a new seed (N)" title="Plant a new seed (N)">
           <Sprout aria-hidden="true" />
         </button>

@@ -24,6 +24,8 @@ test('no serious or critical accessibility violations on any screen', async ({ p
   await page.keyboard.press('Escape');
   await page.keyboard.press('l');
   await audit(page, 'lens');
+  await page.keyboard.press('i');
+  await audit(page, 'inside a call');
   await page.keyboard.press('e');
   await audit(page, 'keep dialog');
   await page.keyboard.press('Escape');

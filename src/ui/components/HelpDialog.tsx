@@ -11,6 +11,7 @@ const SHORTCUTS: Array<[string, string]> = [
   ['↑ ↓', 'Volume'],
   ['M', 'Mute'],
   ['L', 'Recursion lens'],
+  ['I / O', 'Step inside the playing branch / step back out'],
   ['E', 'Keep this song'],
   ['Z', 'Zen mode (any key brings the controls back)'],
   ['?', 'This help'],
@@ -62,6 +63,9 @@ export function HelpDialog() {
           ))}
         </tbody>
       </table>
+      <p className="muted">
+        <strong>Step inside a call.</strong> Every branch is itself a call of the same function, so its subtree is a complete, smaller song. Click any branch (or press I) to dive into it; the breadcrumb at the top shows the calls you are inside, and O steps back out. The bright path on the tree is the live call stack: trunk to the branch that is playing.
+      </p>
       <p className="muted">
         <strong>Wander</strong> walks the tree depth-first: the melody climbs one branch to its leaf, returns, and climbs the next. <strong>Bloom</strong> walks it breadth-first: each level plays as one phrase, left to right, like a harp sweep.
       </p>

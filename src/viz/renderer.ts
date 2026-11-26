@@ -21,6 +21,10 @@ interface SceneNode {
   noteTime: number;
   noteVel: number;
   bellTime: number;
+  /** parent index, or -1 for the trunk */
+  parent: number;
+  /** nodes in this branch's sub-call (itself included); they are contiguous in call order */
+  span: number;
 }
 
 interface Scene {
@@ -32,6 +36,8 @@ interface Scene {
   end: number;
   bornAt: number;
   fadeOutAt: number | null;
+  /** node ids sorted by when they start (for finding the call that is running now) */
+  byStart: number[];
 }
 
 export interface Insets {
@@ -75,6 +81,55 @@ export class GardenRenderer {
   private insets: Insets = { top: 72, right: 24, bottom: 180, left: 24 };
   private cam = { s: 1, x: 0, y: 0, ready: false };
   reducedMotion = false;
+  /** the branch whose sub-call is under the pointer (its whole subtree glows) */
+  hover: number | null = null;
+
+  /** the grown branch nearest to a screen point (CSS px), or null */
+  pick(px: number, py: number, t: number): number | null {
+    const scene = this.scene;
+    if (!scene) return null;
+    const cam = this.cam;
+    const wx = (px - cam.x) / cam.s;
+    const wy = (py - cam.y) / cam.s;
+    const reach = 14 / cam.s;
+    let best: number | null = null;
+    let bestD = Infinity;
+    scene.nodes.forEach((n, id) => {
+      if (t < n.start) return;
+      for (let k = 1; k < n.cum.length; k++) {
+        const x1 = n.pts[k * 2 - 2];
+        const y1 = n.pts[k * 2 - 1];
+        const x2 = n.pts[k * 2];
+        const y2 = n.pts[k * 2 + 1];
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const len2 = dx * dx + dy * dy || 1;
+        const u = Math.max(0, Math.min(1, ((wx - x1) * dx + (wy - y1) * dy) / len2));
+        const d = Math.hypot(wx - (x1 + u * dx), wy - (y1 + u * dy)) - n.width / 2;
+        if (d < bestD) {
+          bestD = d;
+          best = id;
+        }
+      }
+    });
+    return bestD <= reach ? best : null;
+  }
+
+  /** the call running at time t: the latest node to have started */
+  private currentNode(scene: Scene, t: number): number {
+    const order = scene.byStart;
+    let lo = 0;
+    let hi = order.length - 1;
+    let found = -1;
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1;
+      if (scene.nodes[order[mid]].start <= t) {
+        found = order[mid];
+        lo = mid + 1;
+      } else hi = mid - 1;
+    }
+    return found;
+  }
 
   constructor(private canvas: HTMLCanvasElement, palette: Palette, private opts: { maxDpr?: number; staticMode?: boolean } = {}) {
     const ctx = canvas.getContext('2d', { alpha: false });
@@ -131,7 +186,21 @@ export class GardenRenderer {
         cum[i] = total;
       }
       const timing = score.nodeTimes[n.id] ?? { start: 0, grow: 1, sounding: false };
-      return { pts, cum, total, depth: n.depth, width: n.width, start: timing.start, grow: Math.max(0.3, timing.grow), leaf: n.isLeaf, noteTime: -1, noteVel: 0, bellTime: -1 };
+      return {
+        pts,
+        cum,
+        total,
+        depth: n.depth,
+        width: n.width,
+        start: timing.start,
+        grow: Math.max(0.3, timing.grow),
+        leaf: n.isLeaf,
+        noteTime: -1,
+        noteVel: 0,
+        bellTime: -1,
+        parent: n.parentId ?? -1,
+        span: (n.order.ret - n.order.call + 1) / 2,
+      };
     });
     for (const note of score.notes) {
       const sn = nodes[note.nodeId];
@@ -145,7 +214,9 @@ export class GardenRenderer {
     }
     const byDepth: number[][] = Array.from({ length: trace.maxDepth + 1 }, () => []);
     trace.nodes.forEach((n) => byDepth[n.depth].push(n.id));
-    this.scene = { trace, nodes, byDepth, maxDepth: trace.maxDepth, bounds: trace.bounds, end: score.duration, bornAt: now, fadeOutAt: null };
+    const byStart = nodes.map((_, i) => i).sort((a, b) => nodes[a].start - nodes[b].start || a - b);
+    this.scene = { trace, nodes, byDepth, maxDepth: trace.maxDepth, bounds: trace.bounds, end: score.duration, bornAt: now, fadeOutAt: null, byStart };
+    this.hover = null;
     this.sparks = [];
   }
 
@@ -373,6 +444,46 @@ export class GardenRenderer {
       ctx.strokeStyle = rgba(mixRgb(pal.tip, [255, 255, 255], 0.35), 0.35 * a.glow);
       ctx.lineWidth = Math.max(2, n.width * cam.s * 1.6 + 2);
       ctx.stroke();
+    }
+
+    if (live) {
+      const stroke = (i: number) => {
+        const n = scene.nodes[i];
+        const pts = n.pts;
+        ctx.moveTo(sx(pts[0], pts[1]), sy(pts[1]));
+        for (let k = 1; k < n.cum.length; k++) ctx.lineTo(sx(pts[k * 2], pts[k * 2 + 1]), sy(pts[k * 2 + 1]));
+      };
+      // the sub-call under the pointer: its whole subtree glows
+      if (this.hover !== null && scene.nodes[this.hover]) {
+        const h = scene.nodes[this.hover];
+        ctx.beginPath();
+        for (let i = this.hover; i < this.hover + h.span; i++) if (t >= scene.nodes[i].start) stroke(i);
+        ctx.strokeStyle = rgba(mixRgb(pal.accent, [255, 255, 255], 0.25), 0.28);
+        ctx.lineWidth = Math.max(5, h.width * cam.s * 1.2 + 6);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(sx(h.pts[0], h.pts[1]), sy(h.pts[1]), 7, 0, Math.PI * 2);
+        ctx.strokeStyle = rgba(pal.accent, 0.9);
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+      // the live call stack, drawn on the tree: trunk → … → the branch that is running now
+      const cur = this.currentNode(scene, t);
+      if (cur >= 0 && t < scene.end + 1) {
+        ctx.beginPath();
+        for (let i = cur; i >= 0; i = scene.nodes[i].parent) stroke(i);
+        ctx.strokeStyle = rgba(mixRgb(pal.accent2, [255, 255, 255], 0.35), 0.55);
+        ctx.lineWidth = 2.2;
+        ctx.stroke();
+        // one bead per stack frame, at the start of each call
+        ctx.fillStyle = rgba(mixRgb(pal.accent2, [255, 255, 255], 0.5), 0.9);
+        for (let i = cur; i >= 0; i = scene.nodes[i].parent) {
+          const n = scene.nodes[i];
+          ctx.beginPath();
+          ctx.arc(sx(n.pts[0], n.pts[1]), sy(n.pts[1]), i === cur ? 3.6 : 2.4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
     }
 
     // blossoms open when their bell rings, then breathe slowly

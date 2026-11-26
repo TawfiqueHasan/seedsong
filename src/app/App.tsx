@@ -11,6 +11,7 @@ import { KeepDialog } from '../ui/components/KeepDialog';
 import { HelpDialog } from '../ui/components/HelpDialog';
 import { Breathing } from '../ui/components/Breathing';
 import { Toasts } from '../ui/components/Toasts';
+import { CallTrail } from '../ui/components/CallTrail';
 import { useReducedMotion, useShortcuts } from '../ui/hooks';
 import './controller';
 
@@ -66,6 +67,7 @@ export function App() {
       {phase === 'garden' && (
         <div className={`ui-layer ${zen ? 'is-zen' : ''} ${drawerOpen ? 'has-drawer' : ''}`} inert={zen || undefined}>
           <TopBar />
+          <CallTrail />
           {lensOpen && <Lens />}
           {drawerOpen && <Drawer />}
           {breathing && <Breathing />}

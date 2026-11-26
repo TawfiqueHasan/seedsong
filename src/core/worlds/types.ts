@@ -58,6 +58,8 @@ export interface RecursionTrace {
   bounds: { minX: number; minY: number; maxX: number; maxY: number };
   /** total recursive calls, including ones that do not draw (for the lens counters) */
   callCount: number;
+  /** when this trace is a sub-call of a bigger tree: originIds[i] is node i's id in that tree */
+  originIds?: number[];
 }
 
 export type CodeLine = 'call' | 'recurse' | 'base' | 'return';

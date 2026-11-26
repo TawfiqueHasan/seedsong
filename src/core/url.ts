@@ -13,6 +13,8 @@ export interface SongState {
   seed: string;
   bpm?: number;
   transpose?: number;
+  /** node ids of the calls stepped into, outermost first */
+  focus?: number[];
 }
 
 const WORLD_IDS: WorldId[] = ['grove', 'lsystem'];
@@ -26,6 +28,7 @@ export function encodeSong(s: SongState): string {
   q.set('s', s.seed);
   if (s.bpm !== undefined) q.set('t', String(Math.round(s.bpm)));
   if (s.transpose) q.set('k', String(s.transpose));
+  if (s.focus?.length) q.set('f', s.focus.join('.'));
   for (const [k, v] of Object.entries(s.params)) q.set(`p.${k}`, String(Math.round(v * 1000) / 1000));
   return q.toString();
 }
@@ -47,6 +50,8 @@ export function decodeSong(hash: string): Partial<SongState> | null {
   if (q.has('t') && Number.isFinite(t) && t >= 30 && t <= 120) out.bpm = t;
   const k = Number(q.get('k'));
   if (q.has('k') && Number.isFinite(k) && k >= -6 && k <= 6) out.transpose = Math.round(k);
+  const f = q.get('f');
+  if (f && /^\d{1,5}(\.\d{1,5}){0,8}$/.test(f)) out.focus = f.split('.').map(Number);
   const params: WorldParams = {};
   for (const [key, value] of q.entries()) {
     if (!key.startsWith('p.')) continue;

@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import { engine } from '../../audio/engine';
 import { getMood } from '../../core/music/moods';
 import { SCALE_NAMES } from '../../core/music/theory';
+import { enterableAncestor } from '../../core/worlds/subtree';
+import { getWorld } from '../../core/worlds/registry';
 import { GardenRenderer } from '../../viz/renderer';
 import { useApp } from '../../state/store';
 import { useMediaQuery, useReducedMotion } from '../hooks';
@@ -19,6 +21,7 @@ export function GardenCanvas() {
   const trace = useApp((s) => s.trace);
   const reduced = useReducedMotion();
   const narrow = useMediaQuery('(max-width: 760px)');
+  const [tip, setTip] = useState<{ x: number; y: number; title: string; detail: string } | null>(null);
   const compact = useMediaQuery('(max-width: 920px)');
 
   useEffect(() => {
@@ -72,5 +75,49 @@ export function GardenCanvas() {
     return `${kind}, ${trace.nodes.length} branches, ${trace.maxDepth} levels deep, playing in ${score.key} ${SCALE_NAMES[score.scale]} at ${Math.round(score.bpm)} BPM, mood ${m.name}.`;
   }, [trace, score]);
 
-  return <canvas ref={ref} role="img" aria-label={description} />;
+  // hover a branch: its whole sub-call glows; click: step inside that call
+  const targetAt = (e: MouseEvent<HTMLCanvasElement>) => {
+    const s = useApp.getState();
+    const r = renderer.current;
+    if (!r || !s.trace || s.phase !== 'garden' || s.zen) return null;
+    const hit = r.pick(e.clientX, e.clientY, engine.position());
+    return hit === null ? null : enterableAncestor(s.trace, hit);
+  };
+  const onMove = (e: MouseEvent<HTMLCanvasElement>) => {
+    const target = targetAt(e);
+    const r = renderer.current;
+    if (r) r.hover = target;
+    const s = useApp.getState();
+    if (target === null || !s.trace) {
+      if (tip) setTip(null);
+      e.currentTarget.style.cursor = '';
+      return;
+    }
+    const n = s.trace.nodes[target];
+    e.currentTarget.style.cursor = 'pointer';
+    const calls = (n.order.ret - n.order.call + 1) / 2;
+    setTip({ x: e.clientX, y: e.clientY, title: getWorld(s.trace.worldId).frameLabel(n), detail: `${calls} calls inside · click to step in and hear its own song` });
+  };
+  const onLeave = () => {
+    if (renderer.current) renderer.current.hover = null;
+    setTip(null);
+  };
+  const onClick = (e: MouseEvent<HTMLCanvasElement>) => {
+    const target = targetAt(e);
+    if (target === null) return;
+    onLeave();
+    useApp.getState().enterBranch(target);
+  };
+
+  return (
+    <>
+      <canvas ref={ref} role="img" aria-label={description} onPointerMove={onMove} onPointerLeave={onLeave} onClick={onClick} />
+      {tip && (
+        <div className="branch-tip glass" style={{ left: tip.x, top: tip.y }} aria-hidden="true">
+          <strong>{tip.title}</strong>
+          <span>{tip.detail}</span>
+        </div>
+      )}
+    </>
+  );
 }

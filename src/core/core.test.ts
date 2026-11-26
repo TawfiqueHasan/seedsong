@@ -185,7 +185,7 @@ describe('composer', () => {
 
 describe('share links', () => {
   it('round-trips a song', () => {
-    const song = { world: 'grove' as const, params: { depth: 6, spread: 30 }, mood: 'ocean' as const, mode: 'bloom' as const, seed: 'still-lake-07', bpm: 52, transpose: -2 };
+    const song = { world: 'grove' as const, params: { depth: 6, spread: 30 }, mood: 'ocean' as const, mode: 'bloom' as const, seed: 'still-lake-07', bpm: 52, transpose: -2, focus: [1, 2] };
     expect(decodeSong(`#${encodeSong(song)}`)).toEqual(song);
   });
   it('ignores junk', () => {

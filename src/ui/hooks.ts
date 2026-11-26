@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { engine } from '../audio/engine';
 import { useApp } from '../state/store';
 import { MOOD_LIST } from '../core/music/moods';
-import { seekBy, setVolume, toggleMute, togglePlay } from '../app/controller';
+import { seekBy, setVolume, stepIntoPlaying, toggleMute, togglePlay } from '../app/controller';
 
 /** the audible playback position, sampled a few times a second (React does not need 60 fps) */
 export function usePosition(hz = 6): number {
@@ -99,6 +99,10 @@ export function useShortcuts() {
         setVolume(Math.max(0, s.settings.volume - 0.05));
       } else if (k >= '1' && k <= '5') {
         s.setMood(MOOD_LIST[Number(k) - 1].id);
+      } else if (k === 'i' || k === 'I') {
+        if (!stepIntoPlaying()) s.toast('This branch is too small to step into. Try a bigger one.');
+      } else if (k === 'o' || k === 'O') {
+        s.stepOut();
       } else if (k === '?') {
         s.ui({ helpOpen: true });
       }

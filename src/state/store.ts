@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import { seedName } from '../core/random';
 import { getWorld } from '../core/worlds/registry';
 import type { RecursionTrace, WorldId, WorldParams } from '../core/worlds/types';
+import { enterableAncestor, focusTrace } from '../core/worlds/subtree';
 import { composeScore } from '../core/music/compose';
 import { getMood, type AmbienceId, type MoodId } from '../core/music/moods';
 import type { Mode, Score } from '../core/music/score';
@@ -48,6 +49,10 @@ export interface AppState {
   bpm: number | undefined;
   transpose: number;
   trace: RecursionTrace | null;
+  /** the whole tree, even while you are inside one of its calls */
+  fullTrace: RecursionTrace | null;
+  /** the calls you stepped into, outermost first, as node ids of the whole tree */
+  focus: number[];
   score: Score | null;
   version: number;
   playback: 'idle' | 'playing' | 'paused';
@@ -74,6 +79,10 @@ export interface AppState {
   setBpm(b: number | undefined): void;
   setTranspose(t: number): void;
   grow(): void;
+  /** step inside the call of a branch of the current tree (its subtree becomes the song) */
+  enterBranch(localId: number): boolean;
+  /** step back out to the calling branch (or `toRoot` all the way out) */
+  stepOut(toRoot?: boolean): void;
   setPlayback(p: AppState['playback']): void;
   setEnded(e: boolean): void;
   updateSettings(s: Partial<Settings>): void;
@@ -144,6 +153,8 @@ export const useApp = create<AppState>((set, get) => ({
   bpm: persisted.bpm,
   transpose: persisted.transpose ?? 0,
   trace: null,
+  fullTrace: null,
+  focus: [],
   score: null,
   version: 0,
   playback: 'idle',
@@ -163,14 +174,14 @@ export const useApp = create<AppState>((set, get) => ({
   setPhase: (phase) => set({ phase }),
 
   setWorld: (world) => {
-    set({ world });
+    set({ world, focus: [] });
     get().grow();
   },
 
   setParam: (key, value) => {
     const { world, params } = get();
     const def = getWorld(world);
-    set({ params: { ...params, [world]: def.normalize({ ...params[world], [key]: value }) } });
+    set({ params: { ...params, [world]: def.normalize({ ...params[world], [key]: value }) }, focus: [] });
     // regrow after a short pause so dragging a slider does not restart the song on every step
     window.clearTimeout(growTimer);
     growTimer = window.setTimeout(() => get().grow(), 400);
@@ -178,7 +189,7 @@ export const useApp = create<AppState>((set, get) => ({
 
   resetParams: () => {
     const { world, params } = get();
-    set({ params: { ...params, [world]: getWorld(world).defaults } });
+    set({ params: { ...params, [world]: getWorld(world).defaults }, focus: [] });
     get().grow();
   },
 
@@ -194,13 +205,13 @@ export const useApp = create<AppState>((set, get) => ({
 
   setSeed: (seed) => {
     const clean = seed.trim().toLowerCase().replace(/[^\w-]+/g, '-').slice(0, 48) || seedName(entropy());
-    set({ seed: clean });
+    set({ seed: clean, focus: [] });
     window.clearTimeout(growTimer);
     growTimer = window.setTimeout(() => get().grow(), 400);
   },
 
   newSeed: () => {
-    set({ seed: seedName(entropy()) });
+    set({ seed: seedName(entropy()), focus: [] });
     get().grow();
   },
 
@@ -220,9 +231,27 @@ export const useApp = create<AppState>((set, get) => ({
     window.clearTimeout(growTimer);
     const { world, params, seed, mood, mode, bpm, transpose } = get();
     const def = getWorld(world);
-    const trace = def.generate(def.normalize(params[world]), seed);
+    const fullTrace = def.generate(def.normalize(params[world]), seed);
+    const trace = get().focus.length ? focusTrace(fullTrace, get().focus) : fullTrace;
     const score = composeScore(trace, { moodId: mood, mode, bpm, transpose });
-    set((s) => ({ trace, score, version: s.version + 1, ended: false }));
+    set((s) => ({ trace, fullTrace, score, version: s.version + 1, ended: false }));
+  },
+
+  enterBranch: (localId) => {
+    const { trace } = get();
+    if (!trace) return false;
+    const target = enterableAncestor(trace, localId);
+    if (target === null) return false;
+    const originId = trace.originIds ? trace.originIds[target] : target;
+    set((s) => ({ focus: [...s.focus, originId] }));
+    get().grow();
+    return true;
+  },
+
+  stepOut: (toRoot = false) => {
+    if (!get().focus.length) return;
+    set((s) => ({ focus: toRoot ? [] : s.focus.slice(0, -1) }));
+    get().grow();
   },
 
   setPlayback: (playback) => set({ playback }),
@@ -257,6 +286,7 @@ export const useApp = create<AppState>((set, get) => ({
       const def = getWorld(world);
       return {
         world,
+        focus: song.focus ?? [],
         params: song.params ? { ...s.params, [world]: def.normalize({ ...def.defaults, ...song.params }) } : s.params,
         mood: song.mood ?? s.mood,
         mode: song.mode ?? s.mode,
@@ -269,8 +299,8 @@ export const useApp = create<AppState>((set, get) => ({
   },
 
   song: () => {
-    const { world, params, mood, mode, seed, bpm, transpose } = get();
-    return { world, params: params[world], mood, mode, seed, bpm, transpose };
+    const { world, params, mood, mode, seed, bpm, transpose, focus } = get();
+    return { world, params: params[world], mood, mode, seed, bpm, transpose, focus: focus.length ? focus : undefined };
   },
 
   shareUrl: () => {
@@ -282,6 +312,14 @@ export const useApp = create<AppState>((set, get) => ({
 // read a shared song from the URL once, before anything grows
 const fromUrl = typeof location !== 'undefined' ? decodeSong(location.hash) : null;
 if (fromUrl) useApp.getState().loadSong(fromUrl);
+if (typeof window !== 'undefined') {
+  window.addEventListener('hashchange', () => {
+    const song = decodeSong(location.hash);
+    if (!song) return;
+    useApp.getState().loadSong(song);
+    if (useApp.getState().phase === 'garden') useApp.getState().grow();
+  });
+}
 
 // persist preferences, parameters and the garden (never the transient UI state)
 useApp.subscribe((s) => {

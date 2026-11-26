@@ -39,14 +39,25 @@ Two ways to walk the same tree, one toggle:
 - **Wander (depth-first):** the melody climbs one branch to its leaf, returns, and climbs the next, like an improvisation that keeps coming home.
 - **Bloom (breadth-first):** each level plays as one phrase, left to right like a harp sweep, so the tree blooms from drone to bells.
 
-Hearing the difference teaches DFS vs BFS faster than any diagram. Even the harp sound is recursive: it is a Karplus–Strong pluck, a feedback loop.
+Hearing the difference teaches DFS vs BFS faster than any diagram.
+
+### Step inside a call (the signature idea)
+
+A subtree of a recursive function is itself a call of the same function. So in Seedsong **every branch is a complete song of its own**:
+
+- **Hover** any branch and its whole sub-call glows, labelled with its frame, e.g. `branch(depth 2, len 52, θ −45°) · 63 calls inside`.
+- **Click** it (or press **I** for the branch that is playing) and the camera dives in. The branch stands upright as the new trunk and regrows as its own, smaller, self-similar piece, with its own key drone, phrases, cadences and ending.
+- A **breadcrumb of stack frames** shows the calls you are inside (`Whole tree › branch(depth 1…) › branch(depth 3…)`). Click a crumb or press **O** to step back out. Share links remember where you are.
+- While anything plays, the **live call stack is drawn on the tree**: a bright path with one bead per frame, from the trunk to the branch that is running now.
+
+You can literally walk down the call stack and hear that recursion is self-similar. Even the harp sound is recursive: it is a Karplus–Strong pluck, a feedback loop.
 
 ## The six mandatory deliverables
 
 | # | Deliverable | Where it lives |
 | --- | --- | --- |
 | 1 | Recursive algorithm with configurable parameters | **Fractal Grove** `branch(x, y, angle, length, depth)` (`src/core/worlds/grove.ts`): depth, branches, spread, taper, wind, lean, seed. **L-System Garden** `grow(symbol, depth)` (`src/core/worlds/lsystem.ts`): six plants, generations, bend, wind, lean. Drawer → *World* tab. |
-| 2 | Interactive simulation / visualization | Canvas renderer (`src/viz/renderer.ts`): the tree grows branch by branch in sync with its notes, blossoms open when their bell rings, wind sway, fireflies. Plus the **recursion lens** (live call stack, counters, running line of code) and the **depth skyline** timeline you can click to seek. |
+| 2 | Interactive simulation / visualization | Canvas renderer (`src/viz/renderer.ts`): the tree grows branch by branch in sync with its notes, blossoms open when their bell rings, wind sway, fireflies. Plus **step inside any branch’s call** (click a branch, the camera dives in and it regrows as its own song), the live call stack drawn on the tree, the **recursion lens** (live call stack, counters, running line of code) and the **depth skyline** timeline you can click to seek. |
 | 3 | Procedural music from the recursive process | Composer (`src/core/music/compose.ts`): pure, deterministic `RecursionTrace → Score` with scale lock, voice-leading, cadences on returns, density cap, Wander and Bloom. |
 | 4 | UI with parameter controls and audio playback | Play/pause, seek, volume, mute, five mood presets, Wander/Bloom, new seed, drawer with World / Sound / Atmosphere / Session tabs, keyboard shortcuts. |
 | 5 | Working audio export | **Keep this song**: WAV (16- or 24-bit, offline-rendered with the same instruments, dithered, peak-normalised, metadata with the share link), MP3 (192 kbps, Web Worker), MIDI (one track per voice), and 1600×1600 cover art. Real progress bar. |

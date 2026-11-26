@@ -30,3 +30,18 @@ test('keyboard: shortcuts change mood, mode and seed', async ({ page }) => {
   await page.keyboard.press('l');
   await expect(page.getByRole('complementary', { name: 'Recursion lens' })).toBeVisible();
 });
+
+test('step inside the playing call, then back out', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(String(e)));
+  await begin(page);
+  await page.waitForTimeout(4000);
+  await page.keyboard.press('i');
+  const trail = page.getByRole('navigation', { name: 'Calls you are inside' });
+  await expect(trail).toBeVisible();
+  await expect(trail.getByText('Whole tree')).toBeVisible();
+  await expect(page).not.toHaveURL(/f=/); // the URL only changes when you share
+  await page.keyboard.press('o');
+  await expect(trail).toBeHidden();
+  expect(errors).toEqual([]);
+});

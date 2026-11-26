@@ -20,6 +20,15 @@ export async function begin(): Promise<void> {
   applySettings();
   s.setPhase('garden');
   if (!s.score) s.grow();
+  // a gentle, one-time pointer to the signature idea
+  if (!s.settings.onboarded) {
+    window.setTimeout(() => {
+      const now = useApp.getState();
+      if (now.phase !== 'garden' || now.settings.onboarded) return;
+      now.toast('Every branch is a song of its own. Click any branch to step inside its call.');
+      now.updateSettings({ onboarded: true });
+    }, 9000);
+  }
   // the version subscription below starts playback for the first score
 }
 
@@ -125,3 +134,21 @@ useApp.subscribe((s, prev) => {
 });
 
 export const moodDescription = (id: Parameters<typeof getMood>[0]) => getMood(id).description;
+
+/** step inside the call that is playing right now: the bough on its path, one level in */
+export function stepIntoPlaying(): boolean {
+  const s = useApp.getState();
+  if (!s.trace || !s.score) return false;
+  const pos = engine.position();
+  let current = -1;
+  for (const e of s.score.events) {
+    if (e.time > pos) break;
+    if (e.kind === 'call') current = e.nodeId;
+  }
+  if (current <= 0) current = s.trace.nodes.find((n) => n.depth === 1)?.id ?? -1;
+  if (current <= 0) return false;
+  // climb to the child of the current root that leads to the playing branch
+  let n = s.trace.nodes[current];
+  while (n.parentId !== null && s.trace.nodes[n.parentId].depth > 0) n = s.trace.nodes[n.parentId];
+  return s.enterBranch(n.id) || s.enterBranch(current);
+}
