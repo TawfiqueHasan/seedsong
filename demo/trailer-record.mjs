@@ -135,9 +135,24 @@ await scene('stack', async () => {
 });
 await scene('stepin', async ({ at }) => {
   const p = await boughPoint();
-  await at(1.0);
+  await at(0.6);
   await glide(p.x + 40, p.y - 60, 1200);
   await glide(p.x, p.y, 900);
+  // the tree sways gently, so settle onto the branch: nudge until its label appears
+  const found = async () => page.evaluate(() => Boolean(document.querySelector('.branch-tip')));
+  const offsets = [[0, 0]];
+  for (let r = 8; r <= 140; r += 8) for (let a = 0; a < 12; a++) offsets.push([Math.round(r * Math.cos((a * Math.PI) / 6)), Math.round(r * Math.sin((a * Math.PI) / 6))]);
+  let settled = false;
+  for (const [dx, dy] of offsets) {
+    await page.mouse.move(p.x + dx, p.y + dy);
+    mouse = { x: p.x + dx, y: p.y + dy };
+    await page.waitForTimeout(16);
+    if (await found()) {
+      settled = true;
+      break;
+    }
+  }
+  console.log(settled ? `settled on the bough at ${mouse.x},${mouse.y}` : 'could not find the bough');
   await at(4.6);
   await page.mouse.down();
   await page.waitForTimeout(60);

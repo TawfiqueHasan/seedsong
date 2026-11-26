@@ -7,11 +7,11 @@
 A calm browser “sound garden” for Hub’s Quest Epoch 1 · *Recursive Soundscapes*.
 A recursive function grows a glowing tree, and the **call tree itself becomes the music**: every call is a note, every leaf (base case) rings a bell, and every return resolves a phrase.
 
-**Live demo:** https://tawfiquehasan.github.io/seedsong/ · **Demo video (0:51):** https://tawfiquehasan.github.io/seedsong/seedsong-demo.mp4
+**Live demo:** https://tawfiquehasan.github.io/seedsong/ · **Demo video (1:30):** https://tawfiquehasan.github.io/seedsong/seedsong-demo.mp4
 
 <a href="https://tawfiquehasan.github.io/seedsong/seedsong-demo.mp4"><img src="docs/demo-poster.jpg" alt="Seedsong demo video: a glowing fractal tree over a night sky, with the mood chips and playback bar below. Click to watch." width="820"></a>
 
-*Click the picture to watch the 51-second narrated trailer (plays in the browser). The trailer and a longer 3-minute walkthrough are attached to the [v1.0.0 release](https://github.com/TawfiqueHasan/seedsong/releases/tag/v1.0.0).*
+*Click the picture to watch the 90-second narrated trailer (plays in the browser). The trailer and a longer 3-minute walkthrough are attached to the [v1.0.0 release](https://github.com/TawfiqueHasan/seedsong/releases/tag/v1.0.0).*
 
 </div>
 
