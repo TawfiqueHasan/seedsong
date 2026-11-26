@@ -79,29 +79,27 @@ export async function renderScore(score: Score, seed: string, opts: RenderOption
   const original = Tone.getContext();
   const context = new Tone.OfflineContext(2, seconds, opts.sampleRate ?? 44100);
   Tone.setContext(context);
-  let rendering: Promise<Tone.ToneAudioBuffer>;
+  let rack: ReturnType<typeof createRack>;
   try {
     const transport = context.transport;
     transport.bpm.value = score.bpm;
-    const rack = createRack(score.moodId, { bpm: score.bpm, ambience: opts.ambience, withAmbience: opts.withAmbience, seed });
+    rack = createRack(score.moodId, { bpm: score.bpm, ambience: opts.ambience, withAmbience: opts.withAmbience, seed });
     if (opts.mono) {
       const w = new Tone.StereoWidener(0);
       rack.output.connect(w);
       w.toDestination();
     } else rack.output.toDestination();
-    // Give the live app its context back before any await. Every offline node now exists and holds
-    // its own context; if the global stayed offline while we wait for the reverb, a live rack built in
-    // that gap (a regrow or seek during export) would bind to the offline context and fail to connect.
-    Tone.setContext(original);
-    // the classic cause of silent or dry exports is starting before the reverb impulse exists
-    await rack.ready;
-    scheduleScore(transport, rack, score, 0);
-    rack.scheduleAmbience(transport, 0);
-    transport.start(0);
-    rendering = renderFast(context, opts.onProgress);
   } finally {
-    if (Tone.getContext() !== original) Tone.setContext(original);
+    // Restore before yielding so live playback cannot create nodes in the offline context.
+    Tone.setContext(original);
   }
+  // The graph is bound to the offline context, so its readiness and render no longer need the global context.
+  await rack.ready;
+  const transport = context.transport;
+  scheduleScore(transport, rack, score, 0);
+  rack.scheduleAmbience(transport, 0);
+  transport.start(0);
+  const rendering = renderFast(context, opts.onProgress);
   const buffer = await rendering;
   opts.onProgress?.(1);
   const ab = buffer.get();
