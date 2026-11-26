@@ -12,6 +12,12 @@
 | [Lucide](https://lucide.dev/) | ISC | icons |
 | [Vite](https://vite.dev/), [Vitest](https://vitest.dev/), [Playwright](https://playwright.dev/), [axe-core](https://github.com/dequelabs/axe-core), [oxlint](https://oxc.rs/) | MIT / Apache-2.0 / MPL-2.0 | build and tests |
 
+## Demo video (not part of the app)
+
+- Voice-over: [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M) (Apache-2.0), an open-source neural TTS run locally through [kokoro-js](https://github.com/hexgrad/kokoro), voice `af_heart`.
+- Editing: [FFmpeg](https://ffmpeg.org/) (LGPL/GPL) via ffmpeg-static. Music in the video is Seedsong itself, recorded from the app.
+- Scripts: `demo/script.json` (narration), `demo/tts.mjs`, `demo/record.mjs`, `demo/mix.mjs`.
+
 ## Fonts (self-hosted via Fontsource)
 
 - Fraunces: SIL Open Font License 1.1

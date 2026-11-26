@@ -25,3 +25,6 @@ Thumbs.db
 # local tool config
 .claude/launch.json
 .claude/settings.local.json
+
+# demo video output (large; share the file directly)
+demo/output/

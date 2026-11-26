@@ -1,0 +1,73 @@
+{
+  "title": "Seedsong — demo",
+  "voice": "af_heart",
+  "speed": 0.94,
+  "scenes": [
+    {
+      "id": "intro",
+      "action": "landing",
+      "caption": "A recursive function grows a tree. Its call tree becomes the music.",
+      "text": "This is Seedsong. A recursive function grows a glowing tree... and the shape of its call tree becomes calm, ambient music."
+    },
+    {
+      "id": "begin",
+      "action": "begin",
+      "caption": "Every call is a note. Every leaf, the base case, rings a bell. Every return resolves a phrase.",
+      "text": "Press Begin. A warm drone fades in, and the trunk grows with a low note. From here, every call is a note. Every leaf, the base case, rings a bell. And every return... resolves the phrase.",
+      "hold": 6
+    },
+    {
+      "id": "lens",
+      "action": "lens",
+      "caption": "The recursion lens: the live call stack and the line of code that is running.",
+      "text": "Open the recursion lens to watch it happen, live. The call stack, the current depth, and the exact line of code that's running right now."
+    },
+    {
+      "id": "bloom",
+      "action": "bloom",
+      "caption": "Wander walks the tree depth-first. Bloom walks it breadth-first.",
+      "text": "Wander walks the tree depth-first, like a melody that climbs one branch, then comes home. Switch to Bloom, and the same tree plays breadth-first, level by level, like a harp sweep.",
+      "hold": 4
+    },
+    {
+      "id": "moods",
+      "action": "moods",
+      "caption": "Five moods: scale, instruments, ambience and colour change together.",
+      "text": "Five moods change the scale, the instruments, the ambience and the colours together, with a slow crossfade. Every note is locked to the scale, so nothing ever clashes.",
+      "hold": 3
+    },
+    {
+      "id": "shape",
+      "action": "shape",
+      "caption": "Shape the seed. Every control explains what it does to the music.",
+      "text": "Open the drawer to shape the seed. Depth, branches, spread and wind... each control tells you, in plain words, what it does to the music. And the same seed always grows the same song."
+    },
+    {
+      "id": "lsystem",
+      "action": "lsystem",
+      "caption": "A second recursion: an L-system grammar that rewrites itself into plants.",
+      "text": "It's not just one recursion. The L-System Garden rewrites a little grammar into ferns and willows, and every bracket becomes a branch of the melody.",
+      "hold": 4
+    },
+    {
+      "id": "relax",
+      "action": "relax",
+      "caption": "Ambience mixer, breathing companion, sleep timer and zen mode.",
+      "text": "For winding down, there's an ambience mixer, a breathing companion, a sleep timer... and zen mode, which hides everything but the garden.",
+      "hold": 7
+    },
+    {
+      "id": "keep",
+      "action": "keep",
+      "caption": "Keep the song: WAV, MP3, MIDI and cover art, rendered offline.",
+      "text": "When you love a song, keep it. Seedsong renders it offline, with the same instruments you heard, as WAV, MP3, MIDI and cover art, plus a link that regrows the exact same song."
+    },
+    {
+      "id": "outro",
+      "action": "outro",
+      "caption": "",
+      "text": "Plant a seed. Watch recursion grow. And listen to it bloom.",
+      "hold": 6
+    }
+  ]
+}
