@@ -151,7 +151,16 @@ export class AudioEngine {
   private async renewRack(moodId: MoodId, bpm: number, seed: string) {
     if (!this.widener) throw new Error('Audio is locked. Press Begin first.');
     const old = this.rack;
-    this.rack = createRack(moodId, { bpm, ambience: this.settings.ambience, withAmbience: true, seed });
+    // createRack binds to Tone's global context; make sure that is the live one, even if an export
+    // has switched the global to its offline context at this moment
+    const global = Tone.getContext();
+    const live = this.context;
+    if (global !== live) Tone.setContext(live);
+    try {
+      this.rack = createRack(moodId, { bpm, ambience: this.settings.ambience, withAmbience: true, seed });
+    } finally {
+      if (global !== live) Tone.setContext(global);
+    }
     this.rack.output.connect(this.widener);
     await this.rack.ready;
     this.seed = seed;
