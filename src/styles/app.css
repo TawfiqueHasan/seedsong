@@ -473,12 +473,14 @@ select {
 
 .timeline {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 2px;
   min-width: 0;
 }
 
 .timeline-meta {
   display: flex;
+  min-width: 0;
   justify-content: space-between;
   font-size: 12px;
   color: var(--text-2);
@@ -1295,7 +1297,10 @@ kbd {
     overflow-x: auto;
     justify-content: flex-start;
     scrollbar-width: none;
-    padding: 2px;
+    padding: 2px 28px 2px 2px;
+    /* a soft fade on the right edge says "there is more, swipe" */
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent);
   }
   .mood-chip {
     flex: none;
