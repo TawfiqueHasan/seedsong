@@ -14,3 +14,7 @@
     at onPrompt (file:///home/user/seedsong/.claude/hooks/ai-log.mjs:53:17)
     at main (file:///home/user/seedsong/.claude/hooks/ai-log.mjs:41:33)
     at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+2026-11-26T12:09:54.852Z [prompt] Error: UserPromptSubmit input had no "prompt" text; logged a placeholder. The raw transcript still has it.
+    at onPrompt (file:///home/user/seedsong/.claude/hooks/ai-log.mjs:53:17)
+    at main (file:///home/user/seedsong/.claude/hooks/ai-log.mjs:41:33)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)

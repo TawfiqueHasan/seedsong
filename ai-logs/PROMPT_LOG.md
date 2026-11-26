@@ -1313,3 +1313,37 @@ session `7de382cf` · mode: auto
 >
 > Everything is now done and merged: the fixes, your export fix, the complete AI logs on `main`, and both GitHub Pages and the Vercel mirror running the latest build.
 
+
+### Response to prompt 28 · 2026-11-26 12:09:10 (UTC+00:00) · took 20s
+
+> I pushed the latest AI-log updates to `claude/clever-sagan-9bql1n`. They aren't on `main` yet, because each turn of this session writes new entries after the last merge. When you're ready to submit, tell me and I'll merge those last entries into `main` so the full prompt chain is there.
+
+**Commands run:** `git add ai-logs && git commit -q -m "docs: refresh AI logs Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com> Claude-Session: https://…`
+
+<sub>Tools: Bash ×1</sub>
+
+
+<details><summary>Subagent <code>subagent</code> finished · 2026-11-26 12:09:11 (UTC+00:00)</summary>
+
+> what now
+
+</details>
+
+
+---
+
+## Prompt 29 · 2026-11-26 12:09:54 (UTC+00:00)
+
+session `7de382cf` · mode: auto
+
+```text
+(prompt text unavailable to the hook; see transcripts/ for the exact text)
+```
+
+
+### Response to prompt 29 · 2026-11-26 12:10:00 (UTC+00:00) · took 5s
+
+> Both warnings come from Vercel, not your project, and you can ignore them. They're the same message twice: `npm warn Unknown env config "cache-dir"`. Vercel's build machine sets an npm option that newer npm versions plan to drop, and npm prints it once during install and once during the build. Nothing in your repo causes it, and you can't fix it from your side; it's Vercel's to change.
+>
+> Everything else in the log looks fine: it cloned `main` at `27b0ae1`, installed dependencies, ran `vite build`, and the deployment went **Ready**. You don't need to do anything about it.
+
