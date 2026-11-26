@@ -10,6 +10,19 @@ import type { ScoreChord, ScoreNote } from '../core/music/score';
 
 type Transport = ReturnType<typeof Tone.getTransport>;
 
+// Tone false positive: when the pad PolySynth allocates a new voice inside a transport callback,
+// the new FatOscillator disposes its default oscillators via stop() with no time, which trips
+// Tone's "use the passed in scheduling time" check. Nothing is mis-timed (our triggers all pass
+// `time`), so drop only that one message and keep every other Tone warning.
+const SCHEDULE_TIME_FALSE_POSITIVE = 'Events scheduled inside of scheduled callbacks';
+Tone.debug.setLogger({
+  log: (...args: unknown[]) => console.log(...args),
+  warn: (...args: unknown[]) => {
+    if (typeof args[0] === 'string' && args[0].startsWith(SCHEDULE_TIME_FALSE_POSITIVE)) return;
+    console.warn(...args);
+  },
+});
+
 export interface RackOptions {
   bpm: number;
   ambience: Partial<Record<AmbienceId, number>>;

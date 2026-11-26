@@ -89,6 +89,10 @@ export async function renderScore(score: Score, seed: string, opts: RenderOption
       rack.output.connect(w);
       w.toDestination();
     } else rack.output.toDestination();
+    // Give the live app its context back before any await. Every offline node now exists and holds
+    // its own context; if the global stayed offline while we wait for the reverb, a live rack built in
+    // that gap (a regrow or seek during export) would bind to the offline context and fail to connect.
+    Tone.setContext(original);
     // the classic cause of silent or dry exports is starting before the reverb impulse exists
     await rack.ready;
     scheduleScore(transport, rack, score, 0);
@@ -96,8 +100,7 @@ export async function renderScore(score: Score, seed: string, opts: RenderOption
     transport.start(0);
     rendering = renderFast(context, opts.onProgress);
   } finally {
-    // give the live app its context back right away; the render keeps its own
-    Tone.setContext(original);
+    if (Tone.getContext() !== original) Tone.setContext(original);
   }
   const buffer = await rendering;
   opts.onProgress?.(1);

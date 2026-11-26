@@ -1,0 +1,11 @@
+{
+  "counter": 17,
+  "sessions": {
+    "7de382cf-83bc-5897-b5f5-a5665b7c642b": {
+      "firstSeen": "2026-11-26T10:16:12.503Z",
+      "prompts": 17,
+      "lastPrompt": 17,
+      "lastPromptAt": "2026-11-26T11:25:29.912Z"
+    }
+  }
+}

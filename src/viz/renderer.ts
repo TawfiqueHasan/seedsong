@@ -425,6 +425,27 @@ export class GardenRenderer {
       widths.push(wcount ? wsum / wcount : 1);
     }
 
+    // the calls still to come: a faint silhouette of every branch that has not grown yet, so a
+    // depth-first walk never leaves half the sky empty, and you can see the whole call tree waiting
+    if (live && !this.opts.staticMode) {
+      const ghost = new Path2D();
+      let anyGhost = false;
+      for (const n of scene.nodes) {
+        if (t >= n.start + n.grow) continue;
+        const pts = n.pts;
+        ghost.moveTo(sx(pts[0], pts[1]), sy(pts[1]));
+        for (let k = 1; k < n.cum.length; k++) ghost.lineTo(sx(pts[k * 2], pts[k * 2 + 1]), sy(pts[k * 2 + 1]));
+        anyGhost = true;
+      }
+      if (anyGhost) {
+        // fades in over the first few seconds so the opening still starts from a bare trunk
+        ctx.globalAlpha = alpha * clamp01((t - 1.5) / 4);
+        ctx.strokeStyle = rgba(mixRgb(pal.trunk, pal.tip, 0.5), 0.1);
+        ctx.lineWidth = Math.max(0.6, cam.s * 0.9);
+        ctx.stroke(ghost);
+      }
+    }
+
     // trunk-to-tip colour; a wide, low-alpha 'lighter' pass adds the glow
     ctx.globalAlpha = alpha;
     for (let d = 0; d < paths.length; d++) {

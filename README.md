@@ -133,9 +133,9 @@ npm run build        # static site in dist/ (relative base, works on any GitHub 
 
 Measured on this build:
 
-- Unit tests: 24 passing (determinism, node counts, call/return nesting, scale lock for every mood and mode, density cap, tonic ending, length budget, share links). The largest tree (2,047 nodes) generates and composes in about 8 ms.
+- Unit tests: 30 passing (determinism, node counts, call/return nesting, scale lock for every mood and mode, density cap, tonic ending, length budget, share links). The largest tree (2,047 nodes) generates and composes in about 8 ms.
 - End-to-end: Begin → plays with no console errors (desktop and phone viewports); keyboard shortcuts; a real WAV download (about 10.6 MB, RMS −17 dBFS); axe on every screen state with 0 serious/critical violations.
-- Audio QA (`npm run audio:qa`), reference seed `still-lake-07`, all five moods × both modes: peaks −3.6 to −5.8 dBFS (no clipping), RMS about −19 to −20 dBFS live, about −15 to −16.5 dBFS after export normalisation (target −18 to −16 LUFS), no silence longer than 0.1 s before the outro.
+- Audio QA (`npm run audio:qa`), reference seed `still-lake-07`, all five moods × both modes: peaks −3.6 to −5.8 dBFS (no clipping), RMS about −19 to −20 dBFS live, about −15 to −16.5 dBFS RMS after export normalisation (RMS is used as a stand-in for loudness; the design target was about −18 to −16 LUFS, which we did not measure directly), no silence longer than 0.1 s before the outro.
 
 ## Accessibility (WCAG 2.2 AA)
 

@@ -7,9 +7,10 @@ This project was built with Claude Code. Every prompt and every agent response i
 - `transcripts/`: the raw JSONL transcripts exactly as Claude Code stored them, including subagents.
 - `00-planning/`: the planning conversation that produced the spec and this workflow.
 
-Sessions: 2 · prompts: 34 · generated 2026-11-26T08:32:22.268Z
+Sessions: 3 · prompts: 40 · generated 2026-11-26T08:32:22.268Z
 
 | # | Started (UTC) | Prompts | First prompt | Links |
 | --- | --- | --- | --- | --- |
 | 1 | 2026-11-25 17:26 | 17 | @"E:\UIU hackathon\Recursive Soundscapes — Winning Build Plan (Hub's … | [read](sessions/2026-11-25-17-26_e55d86f9.md) · [raw](transcripts/e55d86f9-33bc-4cea-97c0-2372621aa60d.jsonl) |
 | 2 | 2026-11-26 07:35 | 17 | @"E:\UIU hackathon\Recursive Soundscapes — Winning Build Plan (Hub's … | [read](sessions/2026-11-26-07-35_72d0ba3f.md) · [raw](transcripts/72d0ba3f-d062-41a6-8734-4887244e3585.jsonl) |
+| 3 | 2026-11-26 10:16 | 6 | Cloud session: rubric review and fixes | [read](sessions/2026-11-26-10-16_7de382cf.md) · [raw](transcripts/7de382cf-83bc-5897-b5f5-a5665b7c642b.jsonl) |
