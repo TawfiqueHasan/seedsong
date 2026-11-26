@@ -494,3 +494,34 @@ session `7de382cf` · mode: auto
 done
 ```
 
+
+### Response to prompt 9 · 2026-11-26 10:57:26 (UTC+00:00) · took 19s
+
+> The AI-log index is fixed. The stray row is gone from `ai-logs/README.md`, and `ai-logs/INDEX.md` now lists all three sessions. I pulled your edit into this session and pushed, so the branch is in sync with nothing left uncommitted.
+>
+> One thing is still out of date: line 10 of `INDEX.md` still says `Sessions: 2 · prompts: 34`. It's cosmetic, so change it to `Sessions: 3 · prompts: 40` if you want it to match.
+>
+> The fixes are still only on `claude/clever-sagan-9bql1n`, so the live demo shows the old version until they reach `main`. Say "open a PR" and I'll create the pull request. Once you merge it, the deploy runs. Then check the live site on your phone: the playback bar shouldn't overlap, and a faint silhouette of the branches still to come should show behind the growing tree. Do this before the 18:30 freeze.
+
+**Commands run:** `git fetch -q origin claude/clever-sagan-9bql1n && git log --oneline HEAD..FETCH_HEAD && git diff HEAD FETCH_HEAD -- ai-logs/README.md ai-lo…`, `git add ai-logs/.state.json ai-logs/PROMPT_LOG.md ai-logs/prompt-log.jsonl ai-logs/transcripts 2>/dev/null; git diff --cached --quiet || gi…`
+
+<sub>Tools: Bash ×2</sub>
+
+
+<details><summary>Subagent <code>subagent</code> finished · 2026-11-26 10:57:27 (UTC+00:00)</summary>
+
+> open a PR
+
+</details>
+
+
+---
+
+## Prompt 10 · 2026-11-26 11:00:12 (UTC+00:00)
+
+session `7de382cf` · mode: auto
+
+```text
+done
+```
+
