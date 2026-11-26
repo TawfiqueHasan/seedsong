@@ -19,7 +19,7 @@ const tmp = path.join(workDir, 'work');
 fs.mkdirSync(tmp, { recursive: true });
 const tl = JSON.parse(fs.readFileSync(path.join(rec, 'timeline.json'), 'utf8'));
 const FPS = 30;
-const D = 0.45; // crossfade length
+const D = plan.crossfade ?? 0.45; // crossfade length
 const ff = (args, label) => {
   console.log(`· ${label}`);
   execFileSync(ffmpeg, ['-hide_banner', '-loglevel', 'error', '-y', ...args], { stdio: ['ignore', 'inherit', 'inherit'], maxBuffer: 1 << 26 });
@@ -54,8 +54,10 @@ const CAMERA = {
   relax: { z: [1.22, 1.0], f: [[0.5, 0.42], [0.5, 0.5]] },
   keep: { z: [1.0, 1.28], f: [[0.5, 0.5], [0.5, 0.48]] },
   outro: { z: [1.07, 1.0], f: [[0.5, 0.45], [0.5, 0.5]] },
+  stack: { z: [1.0, 1.2], f: [[0.5, 0.5], [0.42, 0.42]] },
+  stepin: { z: [1.08, 1.0], f: [[0.4, 0.4], [0.5, 0.5]] },
 };
-const TRANSITIONS = ['zoomin', 'smoothleft', 'fade', 'smoothup', 'smoothleft', 'fade', 'smoothright', 'fade', 'fadeblack'];
+const TRANSITIONS = ['zoomin', 'fade', 'fade', 'zoomin', 'smoothleft', 'fade', 'smoothup', 'smoothleft', 'fade', 'smoothright', 'fadeblack'];
 
 const scenes = plan.scenes.map((s, i) => {
   const r = tl.scenes.find((x) => x.id === s.id);
@@ -77,7 +79,7 @@ const inputs = [];
 const parts = [];
 scenes.forEach((s, i) => {
   inputs.push('-ss', s.srcStart.toFixed(3), '-t', (s.srcDur + 0.2).toFixed(3), '-i', master);
-  const cam = CAMERA[s.id];
+  const cam = CAMERA[s.id] ?? { z: [1.06, 1.0], f: [[0.5, 0.5], [0.5, 0.5]] };
   const N = Math.round(s.L * FPS);
   const P = `min(1,on/${Math.max(1, N - 1)})`;
   const E = ease(P);

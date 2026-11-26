@@ -31,16 +31,19 @@ export function CallTrail() {
         {focus.map((id, i) => {
           const n = full.nodes[id];
           const last = i === focus.length - 1;
+          // plain words in the trail; the exact frame (arguments) is in the tooltip
+          const plain = n ? `${n.depth === 1 ? 'Bough' : 'Branch'} · level ${n.depth}` : 'Branch';
+          const frame = n ? world.frameLabel(n) : '';
           return (
             <li key={`${id}-${i}`}>
               <ChevronRight aria-hidden="true" />
               {last ? (
-                <span className="crumb current" aria-current="location">
-                  {n ? world.frameLabel(n) : 'branch'}
+                <span className="crumb current" aria-current="location" title={frame}>
+                  {plain}
                 </span>
               ) : (
-                <button className="crumb" onClick={() => outTo(i + 1)}>
-                  {n ? world.frameLabel(n) : 'branch'}
+                <button className="crumb" onClick={() => outTo(i + 1)} title={frame}>
+                  {plain}
                 </button>
               )}
             </li>

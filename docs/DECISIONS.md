@@ -35,3 +35,10 @@ An independent review (the kit's `music-director` agent) traced both reports to 
 ## Signature feature: step inside a call (26 Nov)
 
 A subtree of a recursive function is itself a call of that function, so `subtreeTrace()` (`src/core/worlds/subtree.ts`) lifts any branch out as a full `RecursionTrace`: re-indexed, depth-shifted, sizes rescaled so the sub-song keeps full-length phrasing, and stood upright about its own base so the branch becomes the new trunk. The composer, audio, export, MIDI and visuals need no changes: a sub-call is just another trace. `originIds` map nodes back to the whole tree, so nested steps and share links (`f=` in the URL) work. Only branches with at least two levels below them can be entered, so every step gives a real piece of music. The renderer adds picking (nearest grown segment), a glow over the hovered sub-call and the live call path (trunk → running branch, one bead per frame).
+
+## Judge review fixes (26 Nov, after the step-inside feature)
+
+- The live call path now replays the score's call **and return** events, so it pops back to the caller like a real stack.
+- Entering a branch checks that branch's own height (uneven L-system trees), and stale share links trim their focus instead of showing wrong breadcrumbs.
+- On touch screens the first tap previews a branch and a second tap enters it, so a stray tap never restarts the music. The hover label stays on screen; breadcrumbs use plain words ("Bough · level 1") with the exact frame in a tooltip.
+- Root cause of a rare "time must be greater than or equal to the last scheduled time" error (it also broke WAV export in Dawn Mist): bird chirps share one mono synth, and after the softer 120 ms release the next chirp could start before the previous one had stopped. Chirps are now spaced 220–300 ms apart. Every regrow, seek and replay also gets a fresh instrument rack, so long drone and pad notes from an old schedule can never collide with the new one.

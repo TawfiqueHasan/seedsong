@@ -8,9 +8,19 @@ import { boundsOf, type RecursionTrace, type TraceNode } from './types';
 export const MIN_SUBTREE_LEVELS = 2;
 
 /** the deepest ancestor-or-self of `nodeId` that still has at least MIN_SUBTREE_LEVELS below it */
+/** levels of recursion below a node (its subtree occupies a contiguous run of ids in call order) */
+export function subtreeHeight(trace: RecursionTrace, nodeId: number): number {
+  const n = trace.nodes[nodeId];
+  if (!n) return 0;
+  const span = (n.order.ret - n.order.call + 1) / 2;
+  let deepest = n.depth;
+  for (let i = nodeId; i < nodeId + span; i++) deepest = Math.max(deepest, trace.nodes[i].depth);
+  return deepest - n.depth;
+}
+
 export function enterableAncestor(trace: RecursionTrace, nodeId: number): number | null {
   let n: TraceNode | undefined = trace.nodes[nodeId];
-  while (n && trace.maxDepth - n.depth < MIN_SUBTREE_LEVELS) n = n.parentId === null ? undefined : trace.nodes[n.parentId];
+  while (n && subtreeHeight(trace, n.id) < MIN_SUBTREE_LEVELS) n = n.parentId === null ? undefined : trace.nodes[n.parentId];
   // a real step needs to go below the current root and keep some recursion under it
   if (!n || n.depth === 0) return null;
   return n.id;
@@ -83,11 +93,18 @@ export function subtreeTrace(trace: RecursionTrace, nodeId: number): RecursionTr
 
 /** follow a path of origin ids (outermost first) from a full trace into nested sub-calls */
 export function focusTrace(full: RecursionTrace, path: number[]): RecursionTrace {
+  return focusTraceChecked(full, path).trace;
+}
+
+/** like focusTrace, and also reports how many steps of the path were valid (stale links stop early) */
+export function focusTraceChecked(full: RecursionTrace, path: number[]): { trace: RecursionTrace; steps: number } {
   let t = full;
+  let steps = 0;
   for (const originId of path) {
     const local = t.originIds ? t.originIds.indexOf(originId) : originId;
-    if (local <= 0 || !t.nodes[local]) break;
+    if (local <= 0 || !t.nodes[local] || subtreeHeight(t, local) < MIN_SUBTREE_LEVELS) break;
     t = subtreeTrace(t, local);
+    steps++;
   }
-  return t;
+  return { trace: t, steps };
 }

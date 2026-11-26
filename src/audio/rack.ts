@@ -430,7 +430,9 @@ export function createRack(moodId: MoodId, opts: RackOptions): Rack {
         const base = rng.range(2200, 3400);
         birdPan.pan.setValueAtTime(rng.range(-0.7, 0.7), time);
         for (let i = 0; i < count; i++) {
-          const t = time + i * rng.range(0.11, 0.2);
+          // one mono voice: each chirp (70 ms + 120 ms release) must end before the next starts,
+          // or Tone rejects the earlier start
+          const t = time + i * rng.range(0.22, 0.3);
           const f0 = base * rng.range(0.9, 1.1);
           birdSynth.triggerAttackRelease(f0, 0.07, t, 0.35 + rng() * 0.3);
           birdSynth.frequency.setValueAtTime(f0, t);

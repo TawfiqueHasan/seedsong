@@ -25,7 +25,8 @@ export async function begin(): Promise<void> {
     window.setTimeout(() => {
       const now = useApp.getState();
       if (now.phase !== 'garden' || now.settings.onboarded) return;
-      now.toast('Every branch is a song of its own. Click any branch to step inside its call.');
+      const coarse = typeof matchMedia !== 'undefined' && matchMedia('(pointer: coarse)').matches;
+      now.toast(`Every branch is a song of its own. ${coarse ? 'Tap a branch twice' : 'Click any branch'} to step inside its call.`);
       now.updateSettings({ onboarded: true });
     }, 9000);
   }

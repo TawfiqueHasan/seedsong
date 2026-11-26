@@ -4,7 +4,7 @@ import { create } from 'zustand';
 import { seedName } from '../core/random';
 import { getWorld } from '../core/worlds/registry';
 import type { RecursionTrace, WorldId, WorldParams } from '../core/worlds/types';
-import { enterableAncestor, focusTrace } from '../core/worlds/subtree';
+import { enterableAncestor, focusTraceChecked } from '../core/worlds/subtree';
 import { composeScore } from '../core/music/compose';
 import { getMood, type AmbienceId, type MoodId } from '../core/music/moods';
 import type { Mode, Score } from '../core/music/score';
@@ -232,7 +232,11 @@ export const useApp = create<AppState>((set, get) => ({
     const { world, params, seed, mood, mode, bpm, transpose } = get();
     const def = getWorld(world);
     const fullTrace = def.generate(def.normalize(params[world]), seed);
-    const trace = get().focus.length ? focusTrace(fullTrace, get().focus) : fullTrace;
+    const focus = get().focus;
+    const checked = focus.length ? focusTraceChecked(fullTrace, focus) : { trace: fullTrace, steps: 0 };
+    const trace = checked.trace;
+    // a stale share link (different params) keeps only the steps that still exist
+    if (checked.steps < focus.length) set({ focus: focus.slice(0, checked.steps) });
     const score = composeScore(trace, { moodId: mood, mode, bpm, transpose });
     set((s) => ({ trace, fullTrace, score, version: s.version + 1, ended: false }));
   },

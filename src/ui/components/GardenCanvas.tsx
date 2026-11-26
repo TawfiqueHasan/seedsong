@@ -96,15 +96,33 @@ export function GardenCanvas() {
     const n = s.trace.nodes[target];
     e.currentTarget.style.cursor = 'pointer';
     const calls = (n.order.ret - n.order.call + 1) / 2;
-    setTip({ x: e.clientX, y: e.clientY, title: getWorld(s.trace.worldId).frameLabel(n), detail: `${calls} calls inside · click to step in and hear its own song` });
+    const coarse = typeof matchMedia !== 'undefined' && matchMedia('(pointer: coarse)').matches;
+    // keep the label on screen and clear of the playback bar
+    const x = Math.min(e.clientX + 16, window.innerWidth - 316);
+    const y = Math.min(e.clientY + 18, window.innerHeight - 260);
+    setTip({ x, y, title: getWorld(s.trace.worldId).frameLabel(n), detail: `${calls} calls inside · ${coarse ? 'tap again' : 'click'} to step in and hear its own song` });
   };
   const onLeave = () => {
     if (renderer.current) renderer.current.hover = null;
     setTip(null);
   };
+  // on touch screens the first tap only previews a branch (glow + label); a second tap enters,
+  // so a stray tap can never restart the music
+  const armed = useRef<number | null>(null);
   const onClick = (e: MouseEvent<HTMLCanvasElement>) => {
     const target = targetAt(e);
-    if (target === null) return;
+    if (target === null) {
+      armed.current = null;
+      onLeave();
+      return;
+    }
+    const coarse = typeof matchMedia !== 'undefined' && matchMedia('(pointer: coarse)').matches;
+    if (coarse && armed.current !== target) {
+      armed.current = target;
+      onMove(e);
+      return;
+    }
+    armed.current = null;
     onLeave();
     useApp.getState().enterBranch(target);
   };

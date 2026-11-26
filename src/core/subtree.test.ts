@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { grove } from './worlds/grove';
 import { lsystem } from './worlds/lsystem';
-import { enterableAncestor, focusTrace, subtreeTrace, MIN_SUBTREE_LEVELS } from './worlds/subtree';
+import { enterableAncestor, focusTrace, focusTraceChecked, subtreeHeight, subtreeTrace, MIN_SUBTREE_LEVELS } from './worlds/subtree';
 import type { RecursionTrace } from './worlds/types';
 import { composeScore } from './music/compose';
 import { SCALES, mod } from './music/theory';
@@ -70,6 +70,17 @@ describe('stepping inside a call', () => {
     expect(focusTrace(full, [a.id, sub1.originIds![childLocal]])).toEqual(sub2);
     expect(sub2.originIds![0]).toBe(sub1.originIds![childLocal]);
     expect(full.nodes[sub2.originIds![0]].parentId).toBe(a.id);
+  });
+
+  it('uses each branch own height in uneven trees, and trims stale focus paths', () => {
+    const t = lsystem.generate(lsystem.defaults, 'fern');
+    for (const n of t.nodes) {
+      const target = enterableAncestor(t, n.id);
+      if (target !== null) expect(subtreeHeight(t, target)).toBeGreaterThanOrEqual(MIN_SUBTREE_LEVELS);
+    }
+    expect(focusTraceChecked(full, [999999]).steps).toBe(0);
+    const ok = full.nodes.find((n) => n.depth === 1)!.id;
+    expect(focusTraceChecked(full, [ok, 999999]).steps).toBe(1);
   });
 
   it('works for the L-system garden too', () => {

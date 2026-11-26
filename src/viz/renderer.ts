@@ -36,8 +36,10 @@ interface Scene {
   end: number;
   bornAt: number;
   fadeOutAt: number | null;
-  /** node ids sorted by when they start (for finding the call that is running now) */
-  byStart: number[];
+  /** the score's call/return events in time order: the live call stack is replayed from these */
+  stackTimes: Float64Array;
+  /** node id for a call, or −(node id + 1) for a return */
+  stackEvents: Int32Array;
 }
 
 export interface Insets {
@@ -115,20 +117,22 @@ export class GardenRenderer {
     return bestD <= reach ? best : null;
   }
 
-  /** the call running at time t: the latest node to have started */
+  /** the frame on top of the call stack at time t: after a return, control is back in the caller */
   private currentNode(scene: Scene, t: number): number {
-    const order = scene.byStart;
+    const times = scene.stackTimes;
     let lo = 0;
-    let hi = order.length - 1;
+    let hi = times.length - 1;
     let found = -1;
     while (lo <= hi) {
       const mid = (lo + hi) >> 1;
-      if (scene.nodes[order[mid]].start <= t) {
-        found = order[mid];
+      if (times[mid] <= t) {
+        found = mid;
         lo = mid + 1;
       } else hi = mid - 1;
     }
-    return found;
+    if (found < 0) return -1;
+    const ev = scene.stackEvents[found];
+    return ev >= 0 ? ev : scene.nodes[-ev - 1]?.parent ?? -1;
   }
 
   constructor(private canvas: HTMLCanvasElement, palette: Palette, private opts: { maxDpr?: number; staticMode?: boolean } = {}) {
@@ -214,8 +218,10 @@ export class GardenRenderer {
     }
     const byDepth: number[][] = Array.from({ length: trace.maxDepth + 1 }, () => []);
     trace.nodes.forEach((n) => byDepth[n.depth].push(n.id));
-    const byStart = nodes.map((_, i) => i).sort((a, b) => nodes[a].start - nodes[b].start || a - b);
-    this.scene = { trace, nodes, byDepth, maxDepth: trace.maxDepth, bounds: trace.bounds, end: score.duration, bornAt: now, fadeOutAt: null, byStart };
+    const stackEv = score.events.filter((e) => e.kind === 'call' || e.kind === 'return');
+    const stackTimes = Float64Array.from(stackEv, (e) => e.time);
+    const stackEvents = Int32Array.from(stackEv, (e) => (e.kind === 'call' ? e.nodeId : -(e.nodeId + 1)));
+    this.scene = { trace, nodes, byDepth, maxDepth: trace.maxDepth, bounds: trace.bounds, end: score.duration, bornAt: now, fadeOutAt: null, stackTimes, stackEvents };
     this.hover = null;
     this.sparks = [];
   }

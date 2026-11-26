@@ -14,14 +14,15 @@ if (!toolsDir || !outDir) throw new Error('usage: node demo/trailer-record.mjs <
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
 const plan = JSON.parse(fs.readFileSync(path.join(here, 'trailer.json'), 'utf8'));
-const HANDLE = 0.5; // output seconds of overlap for crossfades
+const HANDLE = plan.crossfade ?? 0.5; // output seconds of overlap for crossfades
 const recDir = path.join(outDir, 'rec');
 const framesDir = path.join(recDir, 'frames');
 fs.rmSync(recDir, { recursive: true, force: true });
 fs.mkdirSync(framesDir, { recursive: true });
 
 const PORT = 4318;
-const server = spawn(process.execPath, [path.join(root, 'node_modules/vite/bin/vite.js'), 'preview', '--port', String(PORT), '--strictPort'], { cwd: root, stdio: 'ignore' });
+// the dev server, so the recorder can read the live trace and aim at a real branch
+const server = spawn(process.execPath, [path.join(root, 'node_modules/vite/bin/vite.js'), '--port', String(PORT), '--strictPort'], { cwd: root, stdio: 'ignore' });
 process.on('exit', () => server.kill());
 for (let i = 0; i < 60; i++) {
   try {
@@ -108,14 +109,51 @@ await scene('begin', async () => {
 await scene('map', async () => {
   await glide(1760, 860, 1500);
 });
+/** screen position of the middle of the first bough, using the renderer's camera fit at 1920×1080 */
+const boughPoint = () =>
+  page.evaluate(async () => {
+    const { useApp } = await import('/src/state/store.ts');
+    const t = useApp.getState().trace;
+    const n = t.nodes.find((x) => x.depth === 1 && x.childIndex === 0);
+    const b = t.bounds;
+    const ins = { top: 76, right: 24, bottom: 170, left: 24 };
+    const bw = Math.max(1, b.maxX - b.minX);
+    const bh = Math.max(1, b.maxY - b.minY);
+    const aw = 1920 - ins.left - ins.right;
+    const ah = 1080 - ins.top - ins.bottom;
+    const sc = Math.min(aw / bw, ah / bh) * 0.92;
+    const cx = ins.left + aw / 2 - (b.minX + bw / 2) * sc;
+    const cy = ins.top + ah / 2 - (b.minY + bh / 2) * sc;
+    const p = n.points;
+    const k = Math.floor(p.length / 4) * 2;
+    const mx = (p[k] + p[k + 2 < p.length ? k + 2 : k]) / 2;
+    const my = (p[k + 1] + p[k + 3 < p.length ? k + 3 : k + 1]) / 2;
+    return { x: mx * sc + cx, y: my * sc + cy };
+  });
+await scene('stack', async () => {
+  await glide(1500, 380, 1600);
+});
+await scene('stepin', async ({ at }) => {
+  const p = await boughPoint();
+  await at(1.0);
+  await glide(p.x + 40, p.y - 60, 1200);
+  await glide(p.x, p.y, 900);
+  await at(4.6);
+  await page.mouse.down();
+  await page.waitForTimeout(60);
+  await page.mouse.up();
+  await glide(1640, 820, 1400);
+});
 await scene('lens', async ({ at }) => {
   await click(page.getByRole('button', { name: /Recursion lens/ }), { ms: 450 });
-  await at(1.6);
+  await at(2.0);
   await glide(300, 560, 900);
 });
 await scene('bloom', async ({ at }) => {
   await key('l', 'close lens');
-  await at(1.4);
+  await wait(0.3);
+  await key('o', 'step out');
+  await at(1.8);
   await click(page.getByRole('radio', { name: /Bloom/ }), { ms: 600 });
   // back to Wander just before the cut, so the next trees grow quickly
   await at(4.5);

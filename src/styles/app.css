@@ -1365,7 +1365,7 @@ dialog.dialog:not([open]) {
   display: flex;
   align-items: center;
   gap: 10px;
-  max-width: min(760px, calc(100% - 560px));
+  max-width: min(760px, calc(100% - 480px));
   padding: 4px 4px 4px 14px;
   background: var(--glass-strong);
   animation: rise-in var(--t-panel) var(--ease-enter) both;
@@ -1379,7 +1379,8 @@ dialog.dialog:not([open]) {
   padding: 0;
   list-style: none;
   min-width: 0;
-  overflow: hidden;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
 .call-trail li {
@@ -1434,7 +1435,6 @@ button.crumb:hover {
 .branch-tip {
   position: fixed;
   z-index: 15;
-  transform: translate(16px, 18px);
   display: grid;
   gap: 2px;
   padding: 8px 12px;

@@ -35,6 +35,7 @@ export class AudioEngine {
   private recorderTap: Tone.Gain | null = null;
   private settings: EngineSettings = { volume: 0.8, muted: false, mono: false, ambience: {} };
   private busy: Promise<void> = Promise.resolve();
+  private seed = '';
   private gen = 0;
   state: EngineState = 'idle';
   unlocked = false;
@@ -142,30 +143,40 @@ export class AudioEngine {
     });
   }
 
-  private async swap(score: Score, seed: string, at: number) {
+  /**
+   * A fresh instrument rack for every new start point (regrow, seek, replay). Reusing voices is
+   * unsafe: a long drone or pad note from the old schedule still has its stop queued in the future,
+   * and starting that voice earlier is rejected by Tone. The old rack fades and is freed later.
+   */
+  private async renewRack(moodId: MoodId, bpm: number, seed: string) {
     if (!this.widener) throw new Error('Audio is locked. Press Begin first.');
+    const old = this.rack;
+    this.rack = createRack(moodId, { bpm, ambience: this.settings.ambience, withAmbience: true, seed });
+    this.rack.output.connect(this.widener);
+    await this.rack.ready;
+    this.seed = seed;
+    if (old) {
+      old.releaseAll(this.settled());
+      const o = old;
+      const out = o.output;
+      out.gain.rampTo(0, 0.4);
+      window.setTimeout(() => {
+        out.disconnect();
+        o.dispose();
+      }, 9000); // let reverb tails finish before freeing nodes
+    }
+  }
+
+  private async swap(score: Score, seed: string, at: number) {
     const transport = this.tr;
     transport.cancel(0);
-    if (!this.rack || this.rack.moodId !== score.moodId) {
-      const old = this.rack;
-      this.rack = createRack(score.moodId as MoodId, { bpm: score.bpm, ambience: this.settings.ambience, withAmbience: true, seed });
-      this.rack.output.connect(this.widener);
-      await this.rack.ready;
-      if (old) {
-        old.releaseAll(this.settled());
-        const o = old;
-        window.setTimeout(() => o.dispose(), 9000); // let reverb tails finish before freeing nodes
-        o.output.disconnect();
-      }
-    } else {
-      this.rack.releaseAll(this.settled());
-      this.rack.setTempo(score.bpm);
-      for (const [id, v] of Object.entries(this.settings.ambience)) this.rack.setAmbience(id as AmbienceId, v ?? 0, 1);
-    }
+    await this.renewRack(score.moodId as MoodId, score.bpm, seed);
+    const rack = this.rack;
+    if (!rack) return;
     this.score = score;
     transport.bpm.value = score.bpm;
-    scheduleScore(transport, this.rack, score, at);
-    this.rack.scheduleAmbience(transport, 0);
+    scheduleScore(transport, rack, score, at);
+    rack.scheduleAmbience(transport, 0);
     transport.seconds = at;
   }
 
@@ -180,6 +191,7 @@ export class AudioEngine {
         const at = transport.seconds >= totalLength(this.score) ? 0 : transport.seconds;
         if (at === 0 && transport.seconds !== 0) {
           transport.cancel(0);
+          await this.renewRack(this.score.moodId as MoodId, this.score.bpm, this.seed);
           scheduleScore(transport, this.rack, this.score, 0);
           this.rack.scheduleAmbience(transport, 0);
         }
@@ -225,8 +237,8 @@ export class AudioEngine {
         await wait(280);
       }
       transport.stop();
-      this.rack.releaseAll(this.settled());
       transport.cancel(0);
+      await this.renewRack(this.score.moodId as MoodId, this.score.bpm, this.seed);
       scheduleScore(transport, this.rack, this.score, s);
       this.rack.scheduleAmbience(transport, 0);
       transport.seconds = s;
