@@ -7,7 +7,7 @@ This project was built with Claude Code. Every prompt and every agent response i
 - `transcripts/`: the raw JSONL transcripts exactly as Claude Code stored them, including subagents.
 - `00-planning/`: the planning conversation that produced the spec and this workflow.
 
-Sessions: 2 · prompts: 34 · generated 2026-11-26T08:32:22.268Z
+Sessions: 3 · prompts: 40 · generated 2026-11-26T08:32:22.268Z
 
 | # | Started (UTC) | Prompts | First prompt | Links |
 | --- | --- | --- | --- | --- |
