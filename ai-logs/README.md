@@ -12,3 +12,4 @@ Seedsong was built for Hub's Quest Epoch 1 with Claude Code as the coding agent.
 | `00-planning/` | The planning conversation (claude.ai) that produced the spec, the prompt chain and this logging setup | Exported by hand |
 
 Method in one line: a written spec (`docs/SPEC.md`) and a phase-by-phase prompt chain (`docs/PROMPTS.md`), each phase planned, implemented, verified with tests and browser screenshots, listened to by the human, and committed.
+| 3 | 2026-11-26 10:16 | 6 | Cloud session: rubric review and fixes | [read](sessions/2026-11-26-10-16_7de382cf.md) · [raw](transcripts/7de382cf-83bc-5897-b5f5-a5665b7c642b.jsonl) |
