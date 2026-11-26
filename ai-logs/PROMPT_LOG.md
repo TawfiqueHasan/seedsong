@@ -1131,3 +1131,64 @@ Notifications are queued for this session (more may arrive before you read them)
 
 <sub>Tools: ReadNotifications ×1, mcp__github__actions_list ×1</sub>
 
+
+### Response to prompt 24 · 2026-11-26 11:51:57 (UTC+00:00) · took 24s
+
+> I've committed the latest AI-log entries and pushed them to `claude/clever-sagan-9bql1n`; nothing is left uncommitted. These entries are on that branch only, not on `main` yet. Before you submit, tell me and I'll do one final merge so `main` has the complete log.
+
+**Commands run:** `git add ai-logs && git commit -q -m "docs: refresh AI logs Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com> Claude-Session: https://…`
+
+<sub>Tools: ReadNotifications ×1, mcp__github__actions_list ×1, Bash ×1</sub>
+
+
+<details><summary>Subagent <code>subagent</code> finished · 2026-11-26 11:51:59 (UTC+00:00)</summary>
+
+> merge the final logs to main
+
+</details>
+
+
+---
+
+## Prompt 25 · 2026-11-26 11:52:47 (UTC+00:00)
+
+session `7de382cf` · mode: auto
+
+```text
+fix vercel...its not rebuilt
+```
+
+
+### Response to prompt 25 · 2026-11-26 11:53:30 (UTC+00:00) · took 43s
+
+> I can't fix Vercel from this session, and the cause is outside the repo.
+>
+> **Why it didn't rebuild:** the Vercel project isn't connected to your GitHub repo. A connected project posts a "Vercel" check on every PR and every push to `main`, but PR #1 and PR #2 only showed our own `verify` check. The repo also has no Vercel config, and the earlier session logs don't mention any Vercel setup. So the mirror was most likely deployed once by hand, from your PC or the dashboard, and it only updates when someone deploys it again. On top of that, this container's network blocks Vercel, so I can't deploy to it myself.
+>
+> **The fix:** connect the project to GitHub once in the Vercel dashboard. After that, every push to `main` rebuilds the mirror automatically, including the final log merge.
+> 1. Go to vercel.com and open the **seedsong** project, then **Settings → Git**.
+> 2. Click **Connect Git Repository** and choose **GitHub → TawfiqueHasan/seedsong**. If Vercel asks, let it install its GitHub app on that repo.
+> 3. Make sure **Production Branch** is `main`.
+> 4. Open **Deployments** and wait for the build of the latest `main` commit, or start one with **Create Deployment** using `main`.
+> 5. Check **Settings → Build & Deployment**:
+>    - **Framework Preset:** Vite
+>    - **Build Command:** `npm run build`
+>    - **Output Directory:** `dist`
+>    - **Node.js version:** 22 or newer
+>
+> If you'd rather just redeploy once from your PC, run this in the repo folder after pulling `main`:
+>
+> ```bash
+> git pull origin main
+> ```
+>
+> ```bash
+> npx vercel --prod
+> ```
+>
+> When the build finishes, tell me and I'll check that the mirror serves the new version by comparing its bundle file name with what GitHub Pages serves. If you want, I can also add a short note to `docs/DECISIONS.md` saying the Vercel mirror deploys from `main` through Vercel's GitHub integration.
+
+**Commands run:** `ls -a | grep -i vercel; grep -rn -i "vercel" --include=*.md --include=*.json --include=*.yml --include=*.ts . 2>/dev/null | grep -v node_mo…`, `grep -rn -i "vercel" ai-logs/sessions/2026-11-26-07-35_72d0ba3f.md | head -20`, `grep -rln -i "vercel" ai-logs/ | head; grep -h -o -i ".\{120\}vercel.\{160\}" ai-logs/transcripts/*.jsonl 2>/dev/null | grep -v 7de382cf | …`
+
+<sub>Tools: Bash ×3</sub>
+
