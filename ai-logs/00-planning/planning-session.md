@@ -17,4 +17,4 @@ Claude analysed the brief and rubric and produced:
 1. A build plan document ("Recursive Soundscapes: Winning Build Plan"): concept, rubric strategy, features, architecture, timeline, Claude Code setup and method, QA and submission checklists. The full text is exported next to this file as `BUILD_PLAN.md`.
 2. This starter kit: `CLAUDE.md`, `docs/SPEC.md`, `docs/PROMPTS.md`, `docs/RUBRIC.md`, project skills (`verify`, `sound-design`, `calm-ux`, `judge`), review agents (`rubric-judge`, `a11y-auditor`, `music-director`), the logging hooks and `scripts/collect-ai-logs.mjs`.
 
-Share link to the full planning conversation: _paste the claude.ai share link here_
+Share link to the full planning conversation: https://claude.ai/share/03a810c4-67a4-44bc-931d-d54b0f0e1fd5

@@ -55,7 +55,7 @@ function polyVoice(synth: Tone.PolySynth): Voice {
 /** a small pool of Karplus–Strong plucks (PluckSynth is monophonic): a feedback loop, so even the sound is recursive */
 function pluckVoice(opts: { dampening: number; resonance: number; attackNoise: number; size?: number }): Voice {
   const out = new Tone.Gain(1);
-  const pool = Array.from({ length: opts.size ?? 6 }, () => {
+  const pool = Array.from({ length: opts.size ?? 10 }, () => {
     const synth = new Tone.PluckSynth({ attackNoise: opts.attackNoise, dampening: opts.dampening, resonance: opts.resonance, release: 1.2 });
     const gain = new Tone.Gain(0.5);
     synth.connect(gain);
@@ -181,10 +181,10 @@ export function createRack(moodId: MoodId, opts: RackOptions): Rack {
   const padSynth = keep(
     new Tone.PolySynth({
       voice: Tone.Synth,
-      maxPolyphony: 14,
+      maxPolyphony: 20,
       options: {
         oscillator: { type: 'fattriangle', count: 2, spread: 16 },
-        envelope: { attack: 2.5, decay: 1, sustain: 0.8, release: 6 },
+        envelope: { attack: 1.2, decay: 1, sustain: 0.8, release: 4 },
       },
     }),
   );
@@ -205,7 +205,7 @@ export function createRack(moodId: MoodId, opts: RackOptions): Rack {
     new Tone.PolySynth({
       voice: Tone.Synth,
       maxPolyphony: 6,
-      options: { oscillator: { type: mood.id === 'temple' ? 'fatsine' : 'sine', count: 2, spread: 6 } as never, envelope: { attack: 6, decay: 0, sustain: 1, release: 8 } },
+      options: { oscillator: { type: mood.id === 'temple' ? 'fatsine' : 'sine', count: 2, spread: 6 } as never, envelope: { attack: 3, decay: 0, sustain: 1, release: 8 } },
     }),
   );
   const droneTrem = keep(new Tone.Gain(1));
@@ -244,16 +244,16 @@ export function createRack(moodId: MoodId, opts: RackOptions): Rack {
       maxPolyphony: 24,
       options: {
         harmonicity: 5.07,
-        modulationIndex: 6,
+        modulationIndex: 3,
         oscillator: { type: 'sine' },
         modulation: { type: 'sine' },
         envelope: { attack: 0.004, decay: 3.5, sustain: 0, release: 3 },
-        modulationEnvelope: { attack: 0.002, decay: 0.7, sustain: 0.15, release: 2 },
+        modulationEnvelope: { attack: 0.002, decay: 0.5, sustain: 0, release: 1.5 },
       },
     }),
   );
   const bellHp = keep(new Tone.Filter(400, 'highpass'));
-  const bellLp = keep(new Tone.Filter(6000, 'lowpass'));
+  const bellLp = keep(new Tone.Filter(4500, 'lowpass'));
   const bellPan = keep(new Tone.Panner(0));
   const bellOut = keep(new Tone.Gain(db(-22)));
   bellSynth.chain(bellHp, bellLp, bellPan, bellOut, sum);
@@ -333,9 +333,14 @@ export function createRack(moodId: MoodId, opts: RackOptions): Rack {
         const mk = (f: number, trill: number, pulse: number, pan: number) => {
           const o = p(new Tone.Oscillator(f, 'sine'));
           const t = p(new Tone.Gain(0));
-          lfo(trill, 0, 1, t.gain, 'square');
+          lfo(trill, 0, 1, t.gain);
           const pg = p(new Tone.Gain(0));
-          lfo(pulse, 0, 1, pg.gain, 'square');
+          // a square pulse, smoothed so the chirp groups fade in and out instead of clicking
+          const pl = p(new Tone.LFO({ frequency: pulse, min: 0, max: 1, type: 'square' }));
+          const sm = p(new Tone.Filter(18, 'lowpass'));
+          pl.connect(sm);
+          sm.connect(pg.gain);
+          pl.start();
           const pn = p(new Tone.Panner(pan));
           o.chain(t, pg, pn, gain);
           sources.push(o);
@@ -383,29 +388,31 @@ export function createRack(moodId: MoodId, opts: RackOptions): Rack {
   }
 
   // occasional ambience events (created up front: callbacks may run while another context is global)
-  const birdSynth = keep(new Tone.Synth({ oscillator: { type: 'sine' }, envelope: { attack: 0.01, decay: 0.05, sustain: 0.3, release: 0.05 } }));
+  const birdSynth = keep(new Tone.Synth({ oscillator: { type: 'sine' }, envelope: { attack: 0.02, decay: 0.06, sustain: 0.3, release: 0.12 } }));
   const birdHp = keep(new Tone.Filter(1800, 'highpass'));
+  const birdLp = keep(new Tone.Filter(5000, 'lowpass'));
   const birdPan = keep(new Tone.Panner(0));
   const birdGain = keep(new Tone.Gain(0));
-  birdSynth.chain(birdHp, birdPan, birdGain, ambBus);
+  birdSynth.chain(birdHp, birdLp, birdPan, birdGain, ambBus);
   send(birdPan, 0.5);
   const chimeSynth = keep(
     new Tone.PolySynth({
       voice: Tone.FMSynth,
       maxPolyphony: 8,
-      options: { harmonicity: 5.07, modulationIndex: 4, envelope: { attack: 0.004, decay: 4, sustain: 0, release: 4 }, modulationEnvelope: { attack: 0.002, decay: 0.5, sustain: 0, release: 1 } },
+      options: { harmonicity: 5.07, modulationIndex: 2.5, envelope: { attack: 0.004, decay: 4, sustain: 0, release: 4 }, modulationEnvelope: { attack: 0.002, decay: 0.5, sustain: 0, release: 1 } },
     }),
   );
   const chimeHp = keep(new Tone.Filter(700, 'highpass'));
+  const chimeLp = keep(new Tone.Filter(5000, 'lowpass'));
   const chimeGain = keep(new Tone.Gain(0));
-  chimeSynth.chain(chimeHp, chimeGain, ambBus);
+  chimeSynth.chain(chimeHp, chimeLp, chimeGain, ambBus);
   send(chimeGain, 0.9);
   const crackle = keep(new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.025, sustain: 0, release: 0.01 } }));
   const crackleHp = keep(new Tone.Filter(1900, 'highpass'));
   const crackleGain = keep(new Tone.Gain(0));
   crackle.chain(crackleHp, crackleGain, ambBus);
   const eventGains: Partial<Record<AmbienceId, { gain: Tone.Gain; max: number }>> = {
-    birds: { gain: birdGain, max: db(-24) },
+    birds: { gain: birdGain, max: db(-28) },
     chimes: { gain: chimeGain, max: db(-22) },
     fire: { gain: crackleGain, max: db(-30) },
   };
@@ -420,7 +427,7 @@ export function createRack(moodId: MoodId, opts: RackOptions): Rack {
         const lvl = levels.birds ?? 0;
         if (lvl <= 0 || !rng.chance(0.4)) return;
         const count = rng.int(2, 4);
-        const base = rng.range(2600, 3900);
+        const base = rng.range(2200, 3400);
         birdPan.pan.setValueAtTime(rng.range(-0.7, 0.7), time);
         for (let i = 0; i < count; i++) {
           const t = time + i * rng.range(0.11, 0.2);
@@ -466,11 +473,11 @@ export function createRack(moodId: MoodId, opts: RackOptions): Rack {
       switch (note.voice) {
         case 'lead':
         case 'ornament':
-          leadPan.pan.setTargetAtTime(note.pan, time, 0.05);
+          leadPan.pan.setTargetAtTime(note.pan * 0.6, time, 0.3);
           lead.trigger(note.midi, dur, time, note.voice === 'ornament' ? note.velocity * 0.75 : note.velocity);
           break;
         case 'bell':
-          bellPan.pan.setTargetAtTime(note.pan, time, 0.05);
+          bellPan.pan.setTargetAtTime(note.pan * 0.6, time, 0.3);
           bell.trigger(note.midi, dur, time, note.velocity);
           break;
         case 'drone':

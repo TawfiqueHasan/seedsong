@@ -1,0 +1,88 @@
+{
+  "title": "Seedsong — trailer cut",
+  "voice": "af_heart",
+  "speed": 1.06,
+  "bpm": 84,
+  "scenes": [
+    {
+      "id": "hook",
+      "action": "landing",
+      "speed": 1,
+      "len": 4.2,
+      "title": "What if recursion could sing?",
+      "text": "What if a recursive function... could sing?"
+    },
+    {
+      "id": "begin",
+      "action": "begin",
+      "speed": 2.2,
+      "len": 6.4,
+      "title": "One call. A whole tree.",
+      "text": "Meet Seedsong. One recursive call grows a whole tree, and the call tree becomes the music."
+    },
+    {
+      "id": "map",
+      "action": "map",
+      "speed": 1.8,
+      "len": 6.2,
+      "title": "Call = note · Leaf = bell · Return = resolve",
+      "text": "Every call is a note. Every leaf rings a bell. Every return resolves the phrase."
+    },
+    {
+      "id": "lens",
+      "action": "lens",
+      "speed": 1.3,
+      "len": 5.2,
+      "title": "See the recursion, live",
+      "text": "Watch it live: the call stack, and the exact line of code that's playing."
+    },
+    {
+      "id": "bloom",
+      "action": "bloom",
+      "speed": 1.8,
+      "len": 4.6,
+      "title": "Depth-first wanders. Breadth-first blooms.",
+      "text": "Depth-first, it wanders. Breadth-first, it blooms."
+    },
+    {
+      "id": "moods",
+      "action": "moods",
+      "speed": 2.8,
+      "len": 4.6,
+      "title": "Five moods. One tap.",
+      "text": "Five moods. One tap. Every note stays in key."
+    },
+    {
+      "id": "shape",
+      "action": "shape",
+      "speed": 2.6,
+      "len": 5.0,
+      "title": "Shape the seed. Grow a grammar.",
+      "text": "Shape the seed... or grow a fern from a grammar."
+    },
+    {
+      "id": "relax",
+      "action": "relax",
+      "speed": 2.0,
+      "len": 4.4,
+      "title": "Breathe. Drift. Zen.",
+      "text": "Breathe. Drift. Go full zen."
+    },
+    {
+      "id": "keep",
+      "action": "keep",
+      "speed": 1.2,
+      "len": 4.2,
+      "title": "Keep it: WAV · MP3 · MIDI",
+      "text": "Then keep your song: WAV, MP3, or MIDI."
+    },
+    {
+      "id": "outro",
+      "action": "outro",
+      "speed": 1,
+      "len": 6.0,
+      "title": "",
+      "text": "Seedsong. Make recursion audible."
+    }
+  ]
+}

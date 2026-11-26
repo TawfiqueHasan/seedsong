@@ -17,3 +17,17 @@ The spec (`docs/SPEC.md`) was written before any code. These are the places the 
 ## Timing safety (a bug found by the e2e tests)
 
 When the song regrows, notes from the old transport that were already handed to the audio graph (inside the 0.12 s look-ahead) can still start after the new transport begins. A voice could then receive a start time earlier than one it already had, and Tone throws. The engine now releases voices and restarts the transport only after the look-ahead window (`settled()`, `startOffset` in `src/audio/engine.ts`).
+
+## Listening feedback round 1 (26 Nov): "a glitch in the music" and "it feels slow"
+
+An independent review (the kit's `music-director` agent) traced both reports to specific code. Changes:
+
+| Problem | Cause | Fix |
+| --- | --- | --- |
+| Crackles and late notes | 'interactive' audio latency and a 0.12 s look-ahead: any main-thread pause over ~60 ms (canvas, React) made notes late | AudioContext with `latencyHint: 'playback'`, 0.2 s look-ahead, 30 ms update interval; the playhead subtracts output latency so visuals stay in sync |
+| Fizzy, metallic bells | FM index 6 with sustained modulation, bells up to MIDI 88–90 | index 3, no modulation sustain, low-pass 4.5 kHz, bells capped at MIDI 84 |
+| Buzz in Night Forest | square-wave LFOs hard-gating 4.3 kHz crickets (~60 clicks/s) | sine trill and a smoothed pulse |
+| Beepy birds (Dawn Mist) | 70 ms pure sines up to 5.7 kHz | softer envelope, lower pitch range, 5 kHz low-pass, −4 dB |
+| Ringing notes sliding left/right | shared panner moved quickly for each new note | narrower, slower pan glide |
+| Double dips when changing mood then seed | crossfades queued, not merged | a generation counter skips stale crossfades |
+| Feels slow | chords changed only every 44–55 s; 4-beat trunk intro; 6 s drone and 2.5 s pad attacks; tempos 48–60 | a new chord every 8+ beats inside long phrases (≈ every 6–8 s), 2-beat intro, 3 s / 1.2 s attacks, tempos 58–72 BPM, denser Bloom |

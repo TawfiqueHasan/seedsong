@@ -16,7 +16,7 @@ export interface EngineSettings {
   ambience: Partial<Record<AmbienceId, number>>;
 }
 
-const FADE_IN = 1.6;
+const FADE_IN = 1.2;
 const FADE_OUT = 0.7;
 const DIP = 1.1;
 
@@ -35,6 +35,7 @@ export class AudioEngine {
   private recorderTap: Tone.Gain | null = null;
   private settings: EngineSettings = { volume: 0.8, muted: false, mono: false, ambience: {} };
   private busy: Promise<void> = Promise.resolve();
+  private gen = 0;
   state: EngineState = 'idle';
   unlocked = false;
 
@@ -43,6 +44,9 @@ export class AudioEngine {
     if (this.unlocked) return;
     // Tone.start() resumes the AudioContext. Some browsers (background tabs, some phones) keep it
     // suspended until a later gesture, so never wait on it forever: retry on the next tap instead.
+    // A 'playback' context gets a larger audio buffer (fewer crackles under load), and a 0.2 s
+    // look-ahead with a short update interval keeps notes on time when the page is busy drawing.
+    if (!this.ctx) Tone.setContext(new Tone.Context({ latencyHint: 'playback', lookAhead: 0.2, updateInterval: 0.03 }), true);
     await Promise.race([Tone.start(), wait(1200)]);
     if (Tone.getContext().state !== 'running') {
       const retry = () => {
@@ -62,7 +66,6 @@ export class AudioEngine {
       /* not supported */
     }
     const ctx = Tone.getContext();
-    ctx.lookAhead = 0.12;
     this.ctx = ctx;
     this.transport = Tone.getTransport();
     this.widener = new Tone.StereoWidener(0.5);
@@ -90,7 +93,8 @@ export class AudioEngine {
     if (!this.score) return 0;
     const t = this.tr;
     if (t.state === 'stopped') return 0;
-    return Math.max(0, t.seconds - this.context.lookAhead);
+    const raw = this.context.rawContext as AudioContext;
+    return Math.max(0, t.seconds - this.context.lookAhead - (raw.outputLatency || raw.baseLatency || 0));
   }
 
   get loaded(): Score | null {
@@ -250,7 +254,10 @@ export class AudioEngine {
 
   /** dip-crossfade into a new score: fade out, swap, fade in. Calm, never abrupt. */
   crossfadeTo(score: Score, seed: string, autoplay = true): Promise<void> {
+    // quick successive changes (mood, then seed) merge into one crossfade to the latest score
+    const gen = ++this.gen;
     return this.queue(async () => {
+      if (gen !== this.gen) return;
       if (!this.fade) return;
       const wasPlaying = this.state === 'playing';
       if (wasPlaying) {

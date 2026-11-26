@@ -1,6 +1,7 @@
 // Voice-over with Kokoro-82M (Apache-2.0), an open-source neural TTS that runs locally.
 // Usage: node demo/tts.mjs <toolsDir> <outDir>
 //   toolsDir: folder where kokoro-js is installed; outDir: where vo_<id>.wav files go.
+//   SCRIPT=trailer.json picks another narration file.
 
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
@@ -10,7 +11,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const [toolsDir, outDir] = process.argv.slice(2);
 if (!toolsDir || !outDir) throw new Error('usage: node demo/tts.mjs <toolsDir> <outDir>');
 const here = path.dirname(fileURLToPath(import.meta.url));
-const script = JSON.parse(fs.readFileSync(path.join(here, 'script.json'), 'utf8'));
+const script = JSON.parse(fs.readFileSync(path.join(here, process.env.SCRIPT || 'script.json'), 'utf8'));
 const require = createRequire(path.join(toolsDir, 'package.json'));
 const { KokoroTTS } = await import(pathToFileURL(require.resolve('kokoro-js')).href);
 

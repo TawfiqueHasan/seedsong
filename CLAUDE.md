@@ -60,7 +60,7 @@ If `node` is not on PATH on the build machine, a portable Node install lives in 
 ## Relaxation rules (never break)
 
 - No sudden loud sounds. Every start, stop and change ramps: at least 50 ms against clicks, 1–3 s for scene changes. Master limiter at -1 dBTP.
-- Notes are always quantised to the active scale. Default tempo 48–64 BPM. At most about 4 notes per second.
+- Notes are always quantised to the active scale. Default tempo 58–72 BPM (raised from 48–64 after listening feedback that it felt slow). At most about 4 notes per second.
 - Motion is slow: ambient loops last 6 s or longer, UI transitions 200–400 ms, no bounce, no shake, no flashing.
 - Copy is short, warm and in the second person. No exclamation marks and no emoji in the UI.
 

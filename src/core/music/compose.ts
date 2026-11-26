@@ -71,7 +71,7 @@ const melodicStep = (node: TraceNode) => clamp(Math.round(node.turn * 1.5 + 0.5)
 
 /** velocity envelope over the piece: rise over the first 25%, hold to 70%, ease to 0.75 */
 function form(x: number): number {
-  if (x < 0.25) return lerp(0.7, 1, x / 0.25);
+  if (x < 0.25) return lerp(0.82, 1, x / 0.25);
   if (x < 0.7) return 1;
   return lerp(1, 0.75, (x - 0.7) / 0.3);
 }
@@ -115,7 +115,7 @@ function composeWander(ctx: Ctx, music: MusicParams): Draft {
   const advance = nodes.map((n, i) => {
     switch (roles[i]) {
       case 'trunk':
-        return 4;
+        return 2;
       case 'section':
         return 2;
       case 'phrase':
@@ -181,6 +181,7 @@ function composeWander(ctx: Ctx, music: MusicParams): Draft {
   let pcs = hPcs(ctx, chord);
   let voicing: number[] | null = null;
   let phraseCount = 0;
+  let chordAt = 0; // beat of the last chord change
   let sectionCount = 0;
   let lastLead = ctx.leadBase + 7;
   let lastBell = -1;
@@ -257,11 +258,21 @@ function composeWander(ctx: Ctx, music: MusicParams): Draft {
         nodeTimes[node.id] = { start: tSec, grow: beat * 0.75, sounding: false };
         continue;
       }
+      // long phrases keep the harmony moving: a new chord every 8+ beats, on a strong beat
+      if ((role === 'lead' || role === 'twig' || role === 'leaf') && cursor - chordAt >= 8 && mod(cursor, 2) < 0.01) {
+        chord = ctx.mood.progression[phraseCount++ % ctx.mood.progression.length];
+        pcs = hPcs(ctx, chord);
+        voicing = voiceLead(chord, ctx.keyPc, voicing);
+        chords.push({ time: tSec, duration: 8 * beat, midis: voicing, symbol: chord.symbol });
+        const r = mod(ctx.keyPc + chord.tones[0], 12);
+        addNote('bass', node, cursor, 4, 36 + r + (r < 4 ? 12 : 0), 0.34, 0);
+        chordAt = cursor;
+      }
       switch (role) {
         case 'trunk': {
-          nodeTimes[node.id] = { start: 0, grow: 4 * beat, sounding: true };
+          nodeTimes[node.id] = { start: 0, grow: 2 * beat, sounding: true };
           addNote('bass', node, 0, 6, ctx.keyPc + 36 + 12 * (ctx.keyPc < 4 ? 1 : 0), 0.42, 0);
-          cursor += 4;
+          cursor += 2;
           break;
         }
         case 'section': {
@@ -278,6 +289,7 @@ function composeWander(ctx: Ctx, music: MusicParams): Draft {
           pcs = hPcs(ctx, chord);
           voicing = voiceLead(chord, ctx.keyPc, voicing);
           phraseStart = tSec;
+          chordAt = cursor;
           chords.push({ time: tSec, duration: 8 * beat, midis: voicing, symbol: chord.symbol });
           const root = mod(ctx.keyPc + chord.tones[0], 12);
           addNote('bass', node, cursor, 4, 36 + root + (root < 4 ? 12 : 0), 0.38, 0);
@@ -306,7 +318,7 @@ function composeWander(ctx: Ctx, music: MusicParams): Draft {
           // each leaf rings the chord tone nearest its own branch's degree, an octave up
           let m = nearestChordTone(degreeToMidi(deg[node.id], ctx.scale, ctx.leadBase) + 12, pcs, ctx.scale, ctx.leadBase);
           if (m === lastBell) m = nearestChordTone(m + (node.childIndex % 2 === 0 ? -3 : 3), pcs, ctx.scale, ctx.leadBase);
-          while (m > 88) m -= 12;
+          while (m > 84) m -= 12;
           while (m < 72) m += 12;
           lastBell = m;
           nodeTimes[node.id] = { start: tSec, grow: 0.5 * beat, sounding: true };
@@ -359,7 +371,7 @@ function composeBloom(ctx: Ctx, music: MusicParams): Draft {
   for (const l of levels) l.sort((a, b) => endX(a) - endX(b));
 
   const phraseLevels = Math.max(1, D - 1);
-  const beatsPerLevel = clamp(Math.round(((150 / beat) / phraseLevels) / 4) * 4, 8, 16);
+  const beatsPerLevel = clamp(Math.round(((150 / beat) / phraseLevels) / 4) * 4, 8, 12);
 
   const notes: ScoreNote[] = [];
   const chords: ScoreChord[] = [];
@@ -376,10 +388,10 @@ function composeBloom(ctx: Ctx, music: MusicParams): Draft {
   let voicing: number[] | null = null;
   // level 0: the trunk and the drone
   const trunk = levels[0][0];
-  nodeTimes[trunk.id] = { start: 0, grow: 4 * beat, sounding: true };
+  nodeTimes[trunk.id] = { start: 0, grow: 2 * beat, sounding: true };
   events.push({ time: 0, kind: 'call', nodeId: trunk.id, depth: 0 });
   push('bass', trunk, 0, 6, ctx.keyPc + 36 + (ctx.keyPc < 4 ? 12 : 0), 0.42);
-  cursor = 4;
+  cursor = 2;
 
   const estTotal = (4 + 4 + beatsPerLevel * phraseLevels + 8) * beat;
   for (let d = 1; d <= D; d++) {
@@ -402,7 +414,7 @@ function composeBloom(ctx: Ctx, music: MusicParams): Draft {
     if (tones.length === 0) tones.push(nearestChordTone(lo + 7, pcs, ctx.scale, ctx.leadBase));
 
     const m = level.length;
-    const soundCount = Math.min(12, m);
+    const soundCount = Math.min(20, m);
     const soundEvery = m / soundCount;
     let nextSound = 0;
     let soundIdx = 0;
@@ -419,6 +431,7 @@ function composeBloom(ctx: Ctx, music: MusicParams): Draft {
         const k = soundCount === 1 ? Math.floor(tones.length / 2) : Math.round((soundIdx / (soundCount - 1)) * (tones.length - 1));
         let midi = tones[k];
         if (voice === 'bell') while (midi < 72) midi += 12;
+        if (voice === 'bell') while (midi > 84) midi -= 12;
         const durB = voice === 'bell' ? 4 : clamp((span / soundCount) * 1.5, 1, 3);
         const v = clamp(0.62 * Math.pow(0.92, d) * form((t * beat) / estTotal) * (1 + rng.jitter(0.08)), 0.12, 0.85);
         push(voice, n, t, durB, midi, voice === 'bell' ? v * 0.9 : v, voice === 'bell' ? 0.02 : 0.012);
