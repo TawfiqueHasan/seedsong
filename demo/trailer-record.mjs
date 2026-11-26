@@ -117,8 +117,12 @@ await scene('bloom', async ({ at }) => {
   await key('l', 'close lens');
   await at(1.4);
   await click(page.getByRole('radio', { name: /Bloom/ }), { ms: 600 });
+  // back to Wander just before the cut, so the next trees grow quickly
+  await at(4.5);
+  await page.getByRole('radio', { name: /Wander/ }).click();
 });
 await scene('moods', async () => {
+  await wait(1.2);
   await click(page.getByRole('radio', { name: 'Deep Ocean' }), { ms: 450 });
   await glide(1500, 620, 900);
 });
@@ -126,8 +130,7 @@ await scene('shape', async ({ at }) => {
   await click(page.getByRole('button', { name: 'Shape your garden' }), { ms: 450 });
   await wait(0.4);
   await click(page.getByRole('radio', { name: /L-System Garden/ }), { ms: 450 });
-  await at(1.4);
-  await click(page.getByRole('slider', { name: 'Generations' }), { dx: 0.98, ms: 450 });
+  await glide(1500, 700, 900);
 });
 await scene('relax', async ({ at }) => {
   await click(page.getByRole('tab', { name: 'Session' }), { ms: 450 });
