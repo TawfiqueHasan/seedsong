@@ -525,3 +525,32 @@ session `7de382cf` · mode: auto
 done
 ```
 
+
+### Response to prompt 10 · 2026-11-26 11:00:27 (UTC+00:00) · took 15s
+
+> The AI-log index is fully fixed: it now reads `Sessions: 3 · prompts: 40` and lists all three sessions. I pulled your edit in and pushed, so the branch is in sync and there's nothing left to commit.
+>
+> The fixes still aren't on `main`, which is the version the live demo deploys from. Say "open a PR" and I'll create the pull request, then you merge it on GitHub before the 18:30 freeze.
+
+**Commands run:** `git fetch -q origin && git log --oneline -3 origin/claude/clever-sagan-9bql1n && git log --oneline -4 origin/main && sed -n 10p <(git show …`, `git add ai-logs/.state.json ai-logs/PROMPT_LOG.md ai-logs/prompt-log.jsonl ai-logs/transcripts && git commit -q -m "docs: refresh AI logs C…`
+
+<sub>Tools: Bash ×2</sub>
+
+
+<details><summary>Subagent <code>subagent</code> finished · 2026-11-26 11:00:27 (UTC+00:00)</summary>
+
+> open a PR
+
+</details>
+
+
+---
+
+## Prompt 11 · 2026-11-26 11:03:19 (UTC+00:00)
+
+session `7de382cf` · mode: auto
+
+```text
+open a PR
+```
+
