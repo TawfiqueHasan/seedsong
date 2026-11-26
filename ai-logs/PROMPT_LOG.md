@@ -1347,3 +1347,45 @@ session `7de382cf` · mode: auto
 >
 > Everything else in the log looks fine: it cloned `main` at `27b0ae1`, installed dependencies, ran `vite build`, and the deployment went **Ready**. You don't need to do anything about it.
 
+
+### Response to prompt 29 · 2026-11-26 12:10:11 (UTC+00:00) · took 17s
+
+> I've committed and pushed the latest AI-log updates to `claude/clever-sagan-9bql1n`. They aren't on `main` yet: before you submit, tell me and I'll merge them so `main` has the full prompt chain.
+
+**Commands run:** `git add ai-logs && git commit -q -m "docs: refresh AI logs Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com> Claude-Session: https://…`
+
+<sub>Tools: Bash ×1</sub>
+
+
+<details><summary>Subagent <code>subagent</code> finished · 2026-11-26 12:10:12 (UTC+00:00)</summary>
+
+> merge the final logs to main
+
+</details>
+
+
+---
+
+## Prompt 30 · 2026-11-26 12:10:33 (UTC+00:00)
+
+session `7de382cf` · mode: auto
+
+```text
+why 2 links
+```
+
+
+### Response to prompt 30 · 2026-11-26 12:10:40 (UTC+00:00) · took 7s
+
+> Vercel gives every deployment several addresses. All of them serve the same build right now, but they behave differently later:
+>
+> | Link | What it is | Use it? |
+> | --- | --- | --- |
+> | **seedsong-kappa.vercel.app** | Your production domain. It always points to the current production deployment. | **Yes.** This is the one in your README; submit this. |
+> | **seedsong-git-main-…vercel.app** | The branch URL. It always shows the latest deployment of the `main` branch. | No need. It looks the same today, but it's long and tied to the branch. |
+> | **seedsong-2zc9956yz-…vercel.app** | The deployment URL, a permanent snapshot of this exact build (commit `27b0ae1`). It never changes, even after future deploys. | Only if you want to link this exact version forever. |
+>
+> The **+1** next to `seedsong-kappa.vercel.app` is one more alias for production, most likely a default name like `seedsong-<your-team>.vercel.app`. Hover over it in Vercel to see it.
+>
+> You don't need to change anything. Keep linking `seedsong-kappa.vercel.app`, plus your GitHub Pages link as the main demo.
+
